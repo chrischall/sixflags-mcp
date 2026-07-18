@@ -18,6 +18,15 @@
 #   - npm trusted publishing       for the --provenance publish job
 set -uo pipefail
 
+if [ -z "${GITHUB_TOKEN:-}" ]; then
+  echo "error: GITHUB_TOKEN is not set." >&2
+  echo "  Provide a token with repo admin (classic 'repo' scope, or a" >&2
+  echo "  fine-grained PAT with Administration: Read+Write on the repo):" >&2
+  echo "" >&2
+  echo "    GITHUB_TOKEN=<admin-pat> scripts/bootstrap-repo.sh" >&2
+  exit 1
+fi
+
 REPO=chrischall/sixflags-mcp
 api() { curl -sS -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "$@"; }
 
