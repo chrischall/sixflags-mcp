@@ -1,21 +1,37 @@
-// Wire-level constants shared by client.ts (general API calls) and
-// auth-password.ts (form-login). Kept in a leaf module to avoid an import
-// cycle between client.ts → auth.ts → auth-password.ts.
+// Wire-level constants for the themeparks.wiki v1 API — the free, no-auth
+// upstream that backs every tool. Kept in a leaf module (imported by client.ts
+// and the schema-owning tool modules) so there's a single source of truth for
+// the base URL and the courtesy headers.
+//
+// Why themeparks.wiki: it exposes live queue/standby wait times, show
+// schedules, ride operating status, park operating hours, and the full
+// attraction directory for the Six Flags chain (Carowinds included, under its
+// post-merger `sixflags_destination_CA` slug) — with no API key and no login.
 
-export const BASE_URL = 'https://ofw.ourfamilywizard.com';
+export const BASE_URL = 'https://api.themeparks.wiki';
 
-// Required on every OFW API request. `ofw-version` is the OFW protocol
-// version, not this package's version — do NOT bump it during a release.
-export const OFW_PROTOCOL_HEADERS = {
-  'ofw-client': 'WebApplication',
-  'ofw-version': '1.0.0',
-} as const;
+// themeparks.wiki has no auth, but a descriptive User-Agent is good API
+// etiquette and helps the operator diagnose our traffic. Overridable via
+// SIXFLAGS_USER_AGENT for anyone who wants to identify their own deployment.
+export function getDefaultHeaders(): Record<string, string> {
+  const ua = process.env.SIXFLAGS_USER_AGENT?.trim();
+  return {
+    Accept: 'application/json',
+    'User-Agent':
+      ua && ua.length > 0
+        ? ua
+        : 'sixflags-mcp (+https://github.com/chrischall/sixflags-mcp)',
+  };
+}
 
-// OFW doesn't return a token expiry, so we synthesize one. Six hours is
-// empirically long enough to be useful and short enough that the 401
-// re-auth replay path stays a rare event rather than the common case.
-export const OFW_TOKEN_TTL_MS = 6 * 60 * 60 * 1000;
+// Per-request timeout. The themeparks.wiki p99 is well under this; the point is
+// to fail fast instead of burning the MCP host's tool-call budget on a stuck
+// upstream. Overridable via SIXFLAGS_REQUEST_TIMEOUT_MS.
+export const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
-// How early we treat a token as expiring. Re-auth before this skew so a
-// long-running request doesn't get a stale token mid-flight.
-export const OFW_TOKEN_EXPIRY_SKEW_MS = 5 * 60 * 1000;
+export function getRequestTimeoutMs(): number {
+  const raw = process.env.SIXFLAGS_REQUEST_TIMEOUT_MS;
+  if (typeof raw !== 'string' || raw.trim().length === 0) return DEFAULT_REQUEST_TIMEOUT_MS;
+  const n = Number(raw.trim());
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_REQUEST_TIMEOUT_MS;
+}

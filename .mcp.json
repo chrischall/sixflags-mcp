@@ -1,11 +1,10 @@
 {
   "mcpServers": {
-    "ofw": {
+    "sixflags": {
       "command": "npx",
-      "args": ["-y", "ofw-mcp"],
+      "args": ["-y", "sixflags-mcp"],
       "env": {
-        "OFW_USERNAME": "${OFW_USERNAME}",
-        "OFW_PASSWORD": "${OFW_PASSWORD}"
+        "SIXFLAGS_HOME_PARK": "${SIXFLAGS_HOME_PARK}"
       }
     }
   }

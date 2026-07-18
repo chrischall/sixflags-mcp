@@ -1,53 +1,28 @@
 #!/usr/bin/env node
-const originalEmit = process.emit.bind(process);
-type EmitFn = (event: string | symbol, ...args: unknown[]) => boolean;
-(process.emit as EmitFn) = function (event: string | symbol, ...args: unknown[]): boolean {
-  if (event === 'warning') {
-    const w = args[0] as { name?: string; message?: string } | undefined;
-    if (w?.name === 'ExperimentalWarning' && /SQLite/i.test(w.message ?? '')) {
-      return false;
-    }
-  }
-  return (originalEmit as EmitFn)(event, ...args);
-};
 import { runMcp } from '@chrischall/mcp-utils';
 import { client } from './client.js';
-import { registerUserTools } from './tools/user.js';
-import { registerMessageTools } from './tools/messages.js';
-import { registerCalendarTools } from './tools/calendar.js';
-import { registerExpenseTools } from './tools/expenses.js';
-import { registerJournalTools } from './tools/journal.js';
-import { OFWCache } from './cache/node.js';
-import { getCacheDbPath } from './config.js';
-import { NodeAttachmentIO } from './tools/attachments.js';
-import type { CacheStore } from './cache/store.js';
+import { ParkDirectory } from './parks.js';
+import { registerParkTools } from './tools/parks.js';
+import { registerWaitTimeTools } from './tools/waittimes.js';
+import { registerAttractionTools } from './tools/attractions.js';
+import { registerHealthTools } from './tools/health.js';
 
-// The stdio server backs the message cache with a local `node:sqlite` file,
-// opened lazily on first use (so the server still boots and answers the host's
-// install-time tools/list probe when no cache path is configured). The hosted
-// Cloudflare connector (a later task) injects a Durable-Object-backed
-// CacheStore + a filesystem-free AttachmentIO into the same registrar instead.
-let nodeCache: CacheStore | undefined;
-const nodeCacheProvider = (): CacheStore => (nodeCache ??= OFWCache.open(getCacheDbPath()));
-const nodeAttachmentIO = new NodeAttachmentIO();
+// The park directory memoizes the (large, slow-changing) themeparks.wiki
+// destinations list and resolves a caller's park reference — including the
+// configured home park — to a park entity id. One instance is threaded to every
+// tool registrar as its dependency; it carries the API client on `.client`.
+const directory = new ParkDirectory(client);
 
-// runMcp builds the McpServer, applies the registrars (with `client` threaded
+// runMcp builds the McpServer, applies the registrars (with `directory` threaded
 // through as deps), prints the banner to stderr, wires SIGINT/SIGTERM graceful
-// shutdown, and connects the stdio transport. The deferred-config-error pattern
-// is preserved: `client` is constructed at module load in ./client.js (auth is
-// resolved lazily on the first tool call), so the host's initial tools/list
-// always succeeds before any credential check runs.
+// shutdown, and connects the stdio transport. There is no credential step — the
+// upstream (themeparks.wiki) is a public, keyless API — so the server is ready
+// the moment the transport connects.
 await runMcp({
-  name: 'ofw',
-  version: '2.6.4', // x-release-please-version
-  deps: client,
-  tools: [
-    registerUserTools,
-    (server, deps) => registerMessageTools(server, deps, nodeCacheProvider, nodeAttachmentIO),
-    registerCalendarTools,
-    registerExpenseTools,
-    registerJournalTools,
-  ],
+  name: 'sixflags',
+  version: '0.0.0', // x-release-please-version
+  deps: directory,
+  tools: [registerParkTools, registerWaitTimeTools, registerAttractionTools, registerHealthTools],
   banner:
-    '[ofw-mcp] This project was developed and is maintained by AI (Claude Sonnet 4.6). Use at your own discretion.',
+    '[sixflags-mcp] Live Six Flags wait times, park hours, and day-planning via themeparks.wiki. Developed and maintained by AI (Claude). Use at your own discretion.',
 });
