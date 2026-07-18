@@ -2,8 +2,7 @@ node_modules/
 dist/
 coverage/
 .env
+*.tsbuildinfo
 *.skill
 *.mcpb
 .claude/worktrees/
-.dev.vars
-.wrangler/

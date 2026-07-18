@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/anthropics/dxt/main/dist/mcpb-manifest.schema.json",
   "manifest_version": "0.3",
-  "name": "ofw-mcp",
-  "display_name": "OurFamilyWizard",
-  "version": "2.6.4",
-  "description": "OurFamilyWizard co-parenting tools for Claude — messages, calendar, expenses, and journal",
+  "name": "sixflags-mcp",
+  "display_name": "Six Flags",
+  "version": "0.0.0",
+  "description": "Six Flags MCP for Claude — live wait times, park hours, shows, and day planning for Carowinds and the whole chain",
   "author": {
     "name": "Chris Chall",
     "email": "chris.c.hall@gmail.com",
@@ -12,19 +12,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrischall/ofw-mcp"
+    "url": "https://github.com/chrischall/sixflags-mcp"
   },
-  "homepage": "https://github.com/chrischall/ofw-mcp",
-  "support": "https://github.com/chrischall/ofw-mcp/issues",
+  "homepage": "https://github.com/chrischall/sixflags-mcp",
+  "support": "https://github.com/chrischall/sixflags-mcp/issues",
   "license": "MIT",
   "keywords": [
-    "ofw",
-    "coparenting",
-    "ourFamilyWizard",
-    "family",
-    "messages",
-    "calendar",
-    "expenses"
+    "sixflags",
+    "carowinds",
+    "cedar-fair",
+    "theme-park",
+    "wait-times",
+    "amusement-park"
   ],
   "server": {
     "type": "node",
@@ -35,154 +34,53 @@
         "${__dirname}/dist/bundle.js"
       ],
       "env": {
-        "OFW_USERNAME": "${user_config.ofw_username}",
-        "OFW_PASSWORD": "${user_config.ofw_password}",
-        "OFW_INLINE_ATTACHMENTS": "${user_config.ofw_inline_attachments}",
-        "OFW_ATTACHMENTS_DIR": "${user_config.ofw_attachments_dir}",
-        "OFW_WRITE_MODE": "${user_config.ofw_write_mode}",
-        "OFW_CALENDAR_WRITES": "${user_config.ofw_calendar_writes}"
+        "SIXFLAGS_HOME_PARK": "${user_config.sixflags_home_park}"
       }
     }
   },
   "user_config": {
-    "ofw_username": {
+    "sixflags_home_park": {
       "type": "string",
-      "title": "OFW Email",
-      "description": "Your OurFamilyWizard login email address. Optional — if omitted, the server falls back to the fetchproxy browser extension (requires being signed in to ourfamilywizard.com in your browser).",
-      "required": false
-    },
-    "ofw_password": {
-      "type": "string",
-      "title": "OFW Password",
-      "description": "Your OurFamilyWizard password. Optional — see ofw_username.",
+      "title": "Home park",
+      "description": "The park every tool defaults to when you don't name one. May be a park name (e.g. \"Carowinds\"), a themeparks.wiki slug, or a park id. Defaults to Carowinds.",
       "required": false,
-      "sensitive": true
-    },
-    "ofw_inline_attachments": {
-      "type": "boolean",
-      "title": "Return attachments inline",
-      "description": "When on, ofw_download_attachment returns bytes inline as MCP content (images render directly; other files come back as embedded resources) instead of writing to disk. Recommended for sandboxed hosts like Claude Desktop where the model cannot read files written to ~/Downloads. Callers can still override per-call via the tool's `inline` argument.",
-      "required": false,
-      "default": false
-    },
-    "ofw_attachments_dir": {
-      "type": "directory",
-      "title": "Attachments download directory",
-      "description": "Directory where ofw_download_attachment writes files when not returning inline. Defaults to ~/Downloads/ofw-mcp/. Pick a directory that is readable by your MCP host.",
-      "required": false
-    },
-    "ofw_write_mode": {
-      "type": "string",
-      "title": "Write mode",
-      "description": "Structural write gate. \"none\" = no write tools registered (read/sync/search only); \"drafts\" = draft-level writes only (save/delete drafts, upload attachments — never send or calendar/expense/journal writes); \"all\" = everything (default). Unrecognized values fail closed to \"none\".",
-      "required": false,
-      "default": "all"
-    },
-    "ofw_calendar_writes": {
-      "type": "boolean",
-      "title": "Calendar writes in drafts mode",
-      "description": "When Write mode is \"drafts\", also register the calendar write tools (create/update/delete event). Calendar events have no draft stage but are reversible (editable/deletable), unlike a sent message. Redundant in \"all\"; never overrides \"none\".",
-      "required": false,
-      "default": false
+      "default": "Carowinds"
     }
   },
   "tools": [
     {
-      "name": "ofw_get_profile",
-      "description": "Get current user and co-parent info"
+      "name": "sixflags_list_parks",
+      "description": "List Six Flags parks and their ids"
     },
     {
-      "name": "ofw_get_notifications",
-      "description": "Get dashboard summary: unread messages, upcoming events, outstanding expenses"
+      "name": "sixflags_get_wait_times",
+      "description": "Current ride wait times and crowd summary for a park"
     },
     {
-      "name": "ofw_list_message_folders",
-      "description": "List message folders and unread counts"
+      "name": "sixflags_suggest_next",
+      "description": "Recommend the next ride by shortest wait"
     },
     {
-      "name": "ofw_list_messages",
-      "description": "List messages in a folder"
+      "name": "sixflags_get_park_schedule",
+      "description": "Operating hours for a park, today forward"
     },
     {
-      "name": "ofw_get_message",
-      "description": "Read a message by ID"
+      "name": "sixflags_list_attractions",
+      "description": "Directory of a park's attractions, shows, or restaurants"
     },
     {
-      "name": "ofw_send_message",
-      "description": "Send a message"
-    },
-    {
-      "name": "ofw_list_drafts",
-      "description": "List draft messages"
-    },
-    {
-      "name": "ofw_save_draft",
-      "description": "Create or update a draft"
-    },
-    {
-      "name": "ofw_delete_draft",
-      "description": "Delete a draft"
-    },
-    {
-      "name": "ofw_get_unread_sent",
-      "description": "List sent messages the co-parent has not yet viewed"
-    },
-    {
-      "name": "ofw_upload_attachment",
-      "description": "Upload a file from disk to use as an attachment on a message or draft"
-    },
-    {
-      "name": "ofw_download_attachment",
-      "description": "Download a message attachment by fileId — returns bytes inline or writes to disk"
-    },
-    {
-      "name": "ofw_sync_messages",
-      "description": "Sync messages from OFW into local cache"
-    },
-    {
-      "name": "ofw_list_events",
-      "description": "List calendar events in a date range"
-    },
-    {
-      "name": "ofw_create_event",
-      "description": "Create a calendar event"
-    },
-    {
-      "name": "ofw_update_event",
-      "description": "Update a calendar event"
-    },
-    {
-      "name": "ofw_delete_event",
-      "description": "Delete a calendar event"
-    },
-    {
-      "name": "ofw_get_expense_totals",
-      "description": "Get expense summary totals"
-    },
-    {
-      "name": "ofw_list_expenses",
-      "description": "List expenses"
-    },
-    {
-      "name": "ofw_create_expense",
-      "description": "Log a new expense"
-    },
-    {
-      "name": "ofw_list_journal_entries",
-      "description": "List journal entries"
-    },
-    {
-      "name": "ofw_create_journal_entry",
-      "description": "Create a journal entry"
+      "name": "sixflags_get_shows",
+      "description": "Today's live show schedule for a park"
     }
   ],
   "compatibility": {
     "platforms": [
       "darwin",
-      "win32"
+      "win32",
+      "linux"
     ],
     "runtimes": {
-      "node": ">=22.5.0"
+      "node": ">=20.0.0"
     }
   }
 }

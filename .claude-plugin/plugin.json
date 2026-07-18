@@ -1,20 +1,20 @@
 {
-  "name": "ofw",
-  "displayName": "OurFamilyWizard",
-  "version": "2.6.4",
-  "description": "OurFamilyWizard co-parenting tools for Claude — messages, calendar, expenses, and journal via MCP",
+  "name": "sixflags",
+  "displayName": "Six Flags",
+  "version": "0.0.0",
+  "description": "Six Flags tools for Claude — live wait times, park hours, shows, and day planning for Carowinds and the whole chain",
   "author": {
     "name": "Chris Chall"
   },
-  "homepage": "https://github.com/chrischall/ofw-mcp",
-  "repository": "https://github.com/chrischall/ofw-mcp",
+  "homepage": "https://github.com/chrischall/sixflags-mcp",
+  "repository": "https://github.com/chrischall/sixflags-mcp",
   "license": "MIT",
   "keywords": [
-    "ofw",
-    "coparenting",
-    "ourFamilyWizard",
-    "mcp",
-    "family"
+    "sixflags",
+    "carowinds",
+    "cedar-fair",
+    "theme-park",
+    "wait-times"
   ],
   "skills": "./skills/",
   "mcp": "./.mcp.json"
