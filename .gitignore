@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+.env
+*.skill
+*.mcpb
+.claude/worktrees/
+.dev.vars
+.wrangler/
