@@ -1,7 +1,7 @@
 {
   "name": "sixflags",
   "displayName": "Six Flags",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Six Flags tools for Claude — live wait times, park hours, shows, and day planning for Carowinds and the whole chain",
   "author": {
     "name": "Chris Chall"

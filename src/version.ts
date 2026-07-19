@@ -4,4 +4,4 @@
 // that it stays equal to package.json. Import VERSION wherever the version is
 // needed rather than re-declaring it — notably from BOTH entry points, since
 // src/worker.ts must never import the stdio entry (src/index.ts).
-export const VERSION = '0.0.0'; // x-release-please-version
+export const VERSION = '1.0.0'; // x-release-please-version
