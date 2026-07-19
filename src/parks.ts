@@ -13,6 +13,25 @@ import { getHomePark } from './config.js';
 // and its Hurricane Harbor).
 const SIXFLAGS_SLUG_PREFIX = 'sixflags';
 
+// Destinations that still carry a `sixflags_destination_*` slug upstream but no
+// longer belong to the chain: on 2026-04-06 six parks were divested to
+// Enchanted Parks (listed at https://www.enchantedparks.com/destinations/).
+// themeparks.wiki dropped Worlds of Fun, Valleyfair, and Michigan's Adventure,
+// but kept these three — it even renamed the St. Louis park to "Mid-America
+// Parks" while leaving the slug untouched — so the prefix filter alone still
+// reports them as Six Flags parks.
+//
+// Keyed on the exact destination slug, NOT a name substring: only Schlitterbahn
+// GALVESTON (`_GV`) was divested, while Schlitterbahn New Braunfels (`_NB`)
+// remains in the chain, and a "Schlitterbahn" substring match would drop both.
+// Excluding a destination drops every park under it (Six Flags St. Louis
+// carries both the dry park and its Hurricane Harbor).
+const DIVESTED_DESTINATION_SLUGS = new Set([
+  'sixflags_destination_sfsl', // Six Flags St. Louis (upstream park name: "Mid-America Parks")
+  'sixflags_destination_sfge', // Six Flags Great Escape
+  'sixflags_destination_gv', // Schlitterbahn Galveston
+]);
+
 // The live/schedule/children endpoints key off the PARK entity id (the id
 // inside `parks[]`), NOT the destination id — mixing them up 404s.
 const destinationsSchema = z.looseObject({
@@ -93,7 +112,10 @@ export class ParkDirectory {
     const parks: Park[] = [];
     for (const dest of data.destinations ?? []) {
       const slug = dest.slug;
-      if (!slug || !slug.toLowerCase().startsWith(SIXFLAGS_SLUG_PREFIX)) continue;
+      if (!slug) continue;
+      const normalizedSlug = slug.toLowerCase();
+      if (!normalizedSlug.startsWith(SIXFLAGS_SLUG_PREFIX)) continue;
+      if (DIVESTED_DESTINATION_SLUGS.has(normalizedSlug)) continue;
       for (const park of dest.parks ?? []) {
         parks.push({ parkId: park.id, name: park.name, destination: dest.name, slug });
       }
