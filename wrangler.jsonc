@@ -20,10 +20,10 @@
   // Kept separate from any other connector's OAUTH_KV so their OAuth grants/tokens
   // never cross-wire.
   //
-  // PLACEHOLDER — replace before the first deploy. Create the namespace with
+  // To stand up a deployment in a different account, create your own
   //   wrangler kv namespace create sixflags-connector-oauth
-  // and paste the returned id over REPLACE_WITH_OAUTH_KV_NAMESPACE_ID below.
-  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "REPLACE_WITH_OAUTH_KV_NAMESPACE_ID" }],
+  // and replace this id.
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "016238dd6e874e0289556d9ba103d806" }],
   // Production custom domain (matches connector.setlist.nullnet.app and
   // connector.untappd.nullnet.app). The zone must be in the deploying account's
   // Cloudflare; wrangler provisions the hostname on deploy. Remove this route to
