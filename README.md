@@ -38,6 +38,22 @@ Via `npx` (published to npm):
 
 Or as a Claude Code plugin from the `chrischall` marketplace, or install the `.mcpb` bundle from a release.
 
+## Hosted connector (claude.ai)
+
+This server can also run as a hosted Cloudflare Worker — an unlisted, shareable
+"remote connector" you add to claude.ai (Settings → Connectors → Add custom
+connector) instead of running it locally. It works on Claude web, desktop, and
+mobile alike, since connectors added on any of those sync to the rest, and it
+exposes the full tool surface above.
+
+Because themeparks.wiki is keyless, **the login page asks for no credentials** —
+just your home park, saved as the default for tools that don't name one. Nothing
+secret is collected or stored.
+
+Setting this up requires a Cloudflare account and is a manual, one-time process
+for whoever hosts it — see
+[`docs/DEPLOY-CONNECTOR.md`](docs/DEPLOY-CONNECTOR.md) for the full runbook.
+
 ## Configuration
 
 All optional — the upstream is keyless.

@@ -45,14 +45,39 @@ export interface Park {
 // a TTL. Instance-scoped (not module-global) so each test gets clean isolation.
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
+export interface ParkDirectoryOptions {
+  /**
+   * Per-user home park. The stdio server leaves this unset so the process-wide
+   * `SIXFLAGS_HOME_PARK` (or the "Carowinds" default) applies exactly as before;
+   * the Cloudflare connector injects the value stored in the user's OAuth props
+   * so each session gets its own default without touching process state.
+   * Absent or blank falls back to {@link getHomePark}.
+   */
+  homePark?: string;
+  /** Injectable clock so TTL expiry is testable. */
+  now?: () => number;
+}
+
 export class ParkDirectory {
   private cache: { parks: Park[]; fetchedAt: number } | undefined;
+  private readonly now: () => number;
+  private readonly homePark: string | undefined;
 
   constructor(
     readonly client: SixFlagsClient,
-    // Injectable clock so TTL expiry is testable.
-    private readonly now: () => number = Date.now,
-  ) {}
+    opts: ParkDirectoryOptions = {},
+  ) {
+    this.now = opts.now ?? Date.now;
+    this.homePark = opts.homePark;
+  }
+
+  /**
+   * The effective home-park reference for this directory: the injected per-user
+   * value when present, else the process-wide env var / built-in default.
+   */
+  get configuredHomePark(): string {
+    return this.homePark?.trim() || getHomePark();
+  }
 
   /** All Six Flags parks, sorted by name. Cached per instance for the TTL. */
   async list(): Promise<Park[]> {
@@ -89,7 +114,7 @@ export class ParkDirectory {
    * `sixflags_list_parks` — when nothing matches or a substring is ambiguous.
    */
   async resolve(ref?: string): Promise<Park> {
-    const query = (ref ?? getHomePark()).trim();
+    const query = (ref ?? this.configuredHomePark).trim();
     const parks = await this.list();
 
     // 1. Exact park-entity UUID.

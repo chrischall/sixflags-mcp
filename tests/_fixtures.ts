@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { SixFlagsClient } from '../src/client.js';
-import { ParkDirectory } from '../src/parks.js';
+import { ParkDirectory, type ParkDirectoryOptions } from '../src/parks.js';
 
 // A destinations payload exercising the slug filter (Six Flags in, others out),
 // multi-park destinations, a destination with no slug, and one with no parks.
@@ -133,7 +133,7 @@ export interface StubOverrides {
  * path to the given fixtures. Returns the directory and the spy so a test can
  * assert call counts (e.g. the memoization cache).
  */
-export function makeDirectory(overrides: StubOverrides = {}, now?: () => number) {
+export function makeDirectory(overrides: StubOverrides = {}, opts: ParkDirectoryOptions = {}) {
   const client = new SixFlagsClient();
   const spy = vi.spyOn(client, 'request').mockImplementation(async (_method: string, path: string) => {
     if (path === '/v1/destinations') return (overrides.destinations ?? destinationsFixture) as never;
@@ -142,6 +142,6 @@ export function makeDirectory(overrides: StubOverrides = {}, now?: () => number)
     if (path.endsWith('/children')) return (overrides.children ?? childrenFixture) as never;
     throw new Error(`unexpected path in test stub: ${path}`);
   });
-  const directory = new ParkDirectory(client, now);
+  const directory = new ParkDirectory(client, opts);
   return { client, directory, spy };
 }

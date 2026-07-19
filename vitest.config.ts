@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 // Coverage-enforced: `npm run test:coverage` (wired into CI) fails the build on
 // any regression below 100%. Genuinely-unreachable defensive branches are
@@ -6,11 +6,20 @@ import { defineConfig } from 'vitest/config';
 // coverage-free for fast local iteration.
 export default defineConfig({
   test: {
+    // `tests/worker.test.ts` only runs under the Workers runtime pool
+    // (`vitest.workers.config.ts` / `npm run worker:test`), which provides the
+    // virtual `cloudflare:test` module it imports. Exclude it from the node pool.
+    exclude: [...configDefaults.exclude, 'tests/worker.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
       exclude: [
         'src/index.ts', // stdio entry point — not unit-testable
+        // Worker-only entry point: imports agents / @chrischall/mcp-connector
+        // (cloudflare:workers), which cannot load under the node pool. It is
+        // exercised by the Workers pool suite (tests/worker.test.ts via
+        // `npm run worker:test`).
+        'src/worker.ts',
       ],
       thresholds: {
         lines: 100,

@@ -2,9 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestHarness, parseToolResult } from '@chrischall/mcp-utils/test';
 import { registerParkTools } from '../../src/tools/parks.js';
 import { makeDirectory, scheduleFixture } from '../_fixtures.js';
+import type { ParkDirectoryOptions } from '../../src/parks.js';
 
-async function harnessFor(overrides = {}) {
-  const { directory } = makeDirectory(overrides);
+async function harnessFor(overrides = {}, opts: ParkDirectoryOptions = {}) {
+  const { directory } = makeDirectory(overrides, opts);
   const h = await createTestHarness((s) => registerParkTools(s, directory));
   return h;
 }
@@ -20,6 +21,16 @@ describe('sixflags_list_parks', () => {
     expect(data.homePark.name).toBe('Carowinds');
     expect(data.count).toBe(5);
     expect(data.parks.find((p) => p.isHomePark)?.name).toBe('Carowinds');
+    await h.close();
+  });
+
+  it('reports the per-directory home park in configuredAs', async () => {
+    const h = await harnessFor({}, { homePark: 'Cedar Point' });
+    const data = parseToolResult<{ homePark: { name: string; parkId: string; configuredAs: string } }>(
+      await h.callTool('sixflags_list_parks', {}),
+    );
+    expect(data.homePark.configuredAs).toBe('Cedar Point');
+    expect(data.homePark.parkId).toBe('p-cp');
     await h.close();
   });
 
