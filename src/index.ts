@@ -2,6 +2,7 @@
 import { runMcp } from '@chrischall/mcp-utils';
 import { client } from './client.js';
 import { ParkDirectory } from './parks.js';
+import { VERSION } from './version.js';
 import { registerParkTools } from './tools/parks.js';
 import { registerWaitTimeTools } from './tools/waittimes.js';
 import { registerAttractionTools } from './tools/attractions.js';
@@ -20,7 +21,7 @@ const directory = new ParkDirectory(client);
 // the moment the transport connects.
 await runMcp({
   name: 'sixflags',
-  version: '0.0.0', // x-release-please-version
+  version: VERSION,
   deps: directory,
   tools: [registerParkTools, registerWaitTimeTools, registerAttractionTools, registerHealthTools],
   banner:

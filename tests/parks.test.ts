@@ -22,7 +22,7 @@ describe('ParkDirectory.list', () => {
 
   it('memoizes within the TTL and refetches after it expires', async () => {
     let clock = 0;
-    const { directory, spy } = makeDirectory({}, () => clock);
+    const { directory, spy } = makeDirectory({}, { now: () => clock });
     await directory.list();
     await directory.list();
     expect(spy).toHaveBeenCalledTimes(1); // second call served from cache
@@ -78,6 +78,25 @@ describe('ParkDirectory.resolve', () => {
   it('throws when nothing matches', async () => {
     const { directory } = makeDirectory();
     await expect(directory.resolve('zzz-nope')).rejects.toThrow(/No Six Flags park/i);
+  });
+
+  it('prefers an injected home park over the environment', async () => {
+    vi.stubEnv('SIXFLAGS_HOME_PARK', 'Carowinds');
+    const { directory } = makeDirectory({}, { homePark: 'Cedar Point' });
+    expect(directory.configuredHomePark).toBe('Cedar Point');
+    expect((await directory.resolve()).parkId).toBe('p-cp');
+  });
+
+  it('falls back to the environment when the injected home park is blank', async () => {
+    vi.stubEnv('SIXFLAGS_HOME_PARK', 'Cedar Point');
+    const { directory } = makeDirectory({}, { homePark: '   ' });
+    expect(directory.configuredHomePark).toBe('Cedar Point');
+    expect((await directory.resolve()).parkId).toBe('p-cp');
+  });
+
+  it('falls back to the default when no home park is injected', async () => {
+    const { directory } = makeDirectory();
+    expect(directory.configuredHomePark).toBe('Carowinds');
   });
 
   it('uses the real clock by default', async () => {

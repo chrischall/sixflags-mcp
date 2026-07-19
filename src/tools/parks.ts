@@ -2,7 +2,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { ParkDirectory } from '../parks.js';
-import { getHomePark } from '../config.js';
 import { jsonResponse } from './_shared.js';
 
 const scheduleEntrySchema = z.looseObject({
@@ -73,7 +72,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           )
         : all;
       return jsonResponse({
-        homePark: { name: home.name, parkId: home.parkId, configuredAs: getHomePark() },
+        homePark: { name: home.name, parkId: home.parkId, configuredAs: directory.configuredHomePark },
         count: parks.length,
         parks: parks.map((p) => ({
           parkId: p.parkId,

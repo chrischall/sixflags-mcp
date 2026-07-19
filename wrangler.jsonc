@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sixflags-connector",
+  "main": "src/worker.ts",
+  "compatibility_date": "2025-11-01",
+  // REQUIRED: src/client.ts imports node:path / node:url for its .env load, and
+  // src/protocol.ts reads process.env for SIXFLAGS_USER_AGENT /
+  // SIXFLAGS_REQUEST_TIMEOUT_MS. Without nodejs_compat the Worker fails startup
+  // validation before a single request lands.
+  "compatibility_flags": ["nodejs_compat"],
+  // The connector is STATELESS — the only Durable Object is the harness's
+  // per-session MCP agent (`SixFlagsMcpAgent`). themeparks.wiki is a keyless
+  // public read API and ParkDirectory memoizes its destinations list in-process
+  // per session, so there is no cache Durable Object here (unlike ofw-connector).
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "SixFlagsMcpAgent" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SixFlagsMcpAgent"] }],
+  // sixflags-connector's own OAuth token store (title: sixflags-connector-oauth).
+  // Kept separate from any other connector's OAUTH_KV so their OAuth grants/tokens
+  // never cross-wire.
+  //
+  // PLACEHOLDER — replace before the first deploy. Create the namespace with
+  //   wrangler kv namespace create sixflags-connector-oauth
+  // and paste the returned id over REPLACE_WITH_OAUTH_KV_NAMESPACE_ID below.
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "REPLACE_WITH_OAUTH_KV_NAMESPACE_ID" }],
+  // Production custom domain (matches connector.setlist.nullnet.app and
+  // connector.untappd.nullnet.app). The zone must be in the deploying account's
+  // Cloudflare; wrangler provisions the hostname on deploy. Remove this route to
+  // deploy to *.workers.dev only.
+  "routes": [{ "pattern": "connector.sixflags.nullnet.app", "custom_domain": true }],
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  }
+}
