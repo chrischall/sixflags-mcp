@@ -36,6 +36,81 @@ describe('ParkDirectory.list', () => {
     const { directory } = makeDirectory({ destinations: {} });
     expect(await directory.list()).toEqual([]);
   });
+
+  it('excludes destinations divested to Enchanted Parks, with all their parks', async () => {
+    // Upstream still tags these `sixflags_destination_*` though the parks left
+    // the chain, so the slug-prefix filter alone lets them through. Six Flags
+    // St. Louis carries TWO parks — both must go.
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          {
+            id: 'd-sfsl',
+            name: 'Six Flags St. Louis',
+            slug: 'sixflags_destination_SFSL',
+            parks: [
+              { id: 'p-mid-america', name: 'Mid-America Parks' },
+              { id: 'p-sfsl-hh', name: 'Hurricane Harbor' },
+            ],
+          },
+          {
+            id: 'd-sfge',
+            name: 'Six Flags Great Escape',
+            slug: 'sixflags_destination_SFGE',
+            parks: [{ id: 'p-sfge', name: 'Six Flags Great Escape' }],
+          },
+          {
+            id: 'd-gv',
+            name: 'Schlitterbahn GV',
+            slug: 'sixflags_destination_GV',
+            parks: [{ id: 'p-gv', name: 'Schlitterbahn GV' }],
+          },
+          {
+            id: 'd-cw',
+            name: 'Carowinds',
+            slug: 'sixflags_destination_CW',
+            parks: [{ id: 'p-cw', name: 'Carowinds' }],
+          },
+        ],
+      },
+    });
+    expect((await directory.list()).map((p) => p.name)).toEqual(['Carowinds']);
+  });
+
+  it('keeps the Schlitterbahn park that was NOT divested', async () => {
+    // Only Schlitterbahn GALVESTON (_GV) went to Enchanted Parks; New Braunfels
+    // (_NB) stayed. A "Schlitterbahn" substring match would wrongly drop both,
+    // which is why the denylist is keyed on the exact destination slug.
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          {
+            id: 'd-nb',
+            name: 'Schlitterbahn NB',
+            slug: 'sixflags_destination_NB',
+            parks: [{ id: 'p-nb', name: 'Schlitterbahn NB' }],
+          },
+        ],
+      },
+    });
+    expect((await directory.list()).map((p) => p.name)).toEqual(['Schlitterbahn NB']);
+  });
+
+  it('matches the divested slugs case-insensitively', async () => {
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          {
+            id: 'd-gv',
+            name: 'Schlitterbahn GV',
+            slug: 'SIXFLAGS_DESTINATION_gv',
+            parks: [{ id: 'p-gv', name: 'Schlitterbahn GV' }],
+          },
+        ],
+      },
+    });
+    expect(await directory.list()).toEqual([]);
+  });
 });
 
 describe('ParkDirectory.resolve', () => {
