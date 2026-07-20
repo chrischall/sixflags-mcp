@@ -2,9 +2,14 @@
 
 This is the operator runbook for standing up `sixflags-mcp` as a hosted
 Cloudflare Worker — a "remote connector" that anyone you share the URL with can
-add to claude.ai (web, desktop, or mobile). It's a manual, one-time (per
-operator) process; there is no CI/CD path for it, and none of the steps below
-can be done by an agent since they require your own Cloudflare account.
+add to claude.ai (web, desktop, or mobile). The first stand-up is a manual,
+one-time (per operator) process — the steps below can't be done by an agent
+since they require your own Cloudflare account.
+
+After that, deploys are automatic: the `deploy-connector` job in
+`release-please.yml` deploys the Worker at every release tag via the shared
+`chrischall/workflows` reusable workflow, and **Actions → deploy-connector →
+Run workflow** deploys any ref on demand.
 
 If you just want the server on your own machine, you don't need any of this —
 see the main [README](../README.md) for the local stdio / `.mcpb` install.
