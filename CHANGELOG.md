@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/chrischall/sixflags-mcp/compare/v1.0.0...v1.0.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **deps:** require @chrischall/mcp-connector &gt;=1.1.1 ([#27](https://github.com/chrischall/sixflags-mcp/issues/27)) ([b456b81](https://github.com/chrischall/sixflags-mcp/commit/b456b81eb47d996526e9eeba615f329561a4752e))
+
 ## 1.0.0 (2026-07-19)
 
 
