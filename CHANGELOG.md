@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/chrischall/sixflags-mcp/compare/v1.0.1...v1.0.2) (2026-07-27)
+
+
+### Documentation
+
+* drop the stray CHANGELOG heading, document the divested denylist ([#32](https://github.com/chrischall/sixflags-mcp/issues/32)) ([9330caf](https://github.com/chrischall/sixflags-mcp/commit/9330cafda3c645ed433c619ee7b76e44d3dcf434))
+
 ## [1.0.1](https://github.com/chrischall/sixflags-mcp/compare/v1.0.0...v1.0.1) (2026-07-27)
 
 
