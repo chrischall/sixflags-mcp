@@ -31,5 +31,3 @@
 ### Documentation
 
 * plan the authenticated Six Flags integration (research, not started) ([#14](https://github.com/chrischall/sixflags-mcp/issues/14)) ([99ef02c](https://github.com/chrischall/sixflags-mcp/commit/99ef02cecb07df870893335921a59e4f96120bbf))
-
-## Changelog
