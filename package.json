@@ -44,7 +44,7 @@
     "@chrischall/mcp-connector": "^1.1.0",
     "@cloudflare/vitest-pool-workers": "^0.18.4",
     "@cloudflare/workers-oauth-provider": "^0.8.1",
-    "@cloudflare/workers-types": "^5.20260708.1",
+    "@cloudflare/workers-types": "^5.20260726.1",
     "@types/node": "^26.0.0",
     "@vitest/coverage-v8": "^4.1.7",
     "agents": "^0.19.0",
