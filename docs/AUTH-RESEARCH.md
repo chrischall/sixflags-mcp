@@ -1,8 +1,13 @@
 # Six Flags authenticated integration — research & design plan
 
+> **Historical.** Written while sixflags-mcp was served by its own hosted
+> Cloudflare Worker connector, which has since been retired — the server is
+> hosted through mcp-host now. The analysis of Six Flags' auth surface still
+> stands; the deployment specifics no longer describe anything live.
+
 **Status: research, not started.** This repo ships today as a keyless,
 read-only MCP over the public [themeparks.wiki](https://themeparks.wiki) API,
-with a hosted Cloudflare Worker connector. Nothing here talks to Six Flags'
+with a hosted per-user deployment. Nothing here talks to Six Flags'
 own account system. This doc plans the work to add *authenticated* Six Flags
 features (a user's passes, reservations, Flash Pass, etc.) and records what a
 first reconnaissance pass established, so a later session can resume without
@@ -89,7 +94,7 @@ Method (cannot be driven from this environment — operator runs it):
 2. Fresh-install / log into the Six Flags app while capturing.
 3. Look for, in order of usefulness:
    - a **token endpoint** returning a JWT + refresh token (→ durable, storable,
-     `ofw`-style hosted connector becomes viable);
+     `ofw`-style hosted per-user deployment becomes viable);
    - an `Authorization: Bearer …` header on authenticated API calls (confirms
      bearer, not cookie);
    - whether the app *also* rides reCAPTCHA / cookies (→ confirms fetchproxy is
@@ -111,7 +116,6 @@ Therefore:
   both the best architectural fit and the cleanest privacy posture.
 - If Track B ever leads to credential collection, it must be **consented and
   disclosed** at the point of entry, and the privacy note in `src/sixflags-auth.ts`
-  **and** `docs/DEPLOY-CONNECTOR.md` (which sells "No credentials — anywhere")
   must be rewritten in the *same* PR. No silent capture behind the current
   promise.
 - Store a **token**, never the raw password — and keep the password only if the
@@ -136,4 +140,3 @@ Therefore:
 - [ ] Choose architecture per the Track B decision gate.
 - [ ] Build read-only tools first; gate any writes.
 - [ ] If any credential collection: update `sixflags-auth.ts` privacy note +
-      `DEPLOY-CONNECTOR.md` in the same PR.

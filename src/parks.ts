@@ -68,7 +68,7 @@ export interface ParkDirectoryOptions {
   /**
    * Per-user home park. The stdio server leaves this unset so the process-wide
    * `SIXFLAGS_HOME_PARK` (or the "Carowinds" default) applies exactly as before;
-   * the Cloudflare connector injects the value stored in the user's OAuth props
+   * a hosted deployment injects the value stored in the user's OAuth props
    * so each session gets its own default without touching process state.
    * Absent or blank falls back to {@link getHomePark}.
    */
