@@ -6,7 +6,6 @@ import { configDefaults, defineConfig } from 'vitest/config';
 // coverage-free for fast local iteration.
 export default defineConfig({
   test: {
-    exclude: [...configDefaults.exclude, 'tests/worker.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
