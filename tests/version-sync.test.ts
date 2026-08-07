@@ -19,12 +19,10 @@ describe('version sync', () => {
     expect(mismatches).toEqual([]);
   });
 
-  // src/version.ts is the single source of truth both entry points read: the
-  // stdio server (src/index.ts) and the Cloudflare Worker connector
-  // (src/worker.ts, which must never import the stdio entry). Asserting the
-  // export directly guards the value AND keeps the module covered under the
-  // 100% gate, since a bare `export const` module is otherwise never imported
-  // by the node suite.
+  // src/version.ts is the single source of truth the entry point reads.
+  // Asserting the export directly guards the value AND keeps the module covered
+  // under the 100% gate, since a bare `export const` module is otherwise never
+  // imported by the node suite.
   it('src/version.ts VERSION equals package.json#version', () => {
     const pkg = JSON.parse(readFileSync(join(here, '..', 'package.json'), 'utf8')) as {
       version: string;

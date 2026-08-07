@@ -3,7 +3,7 @@
   "version": "1.0.2",
   "license": "MIT",
   "mcpName": "io.github.chrischall/sixflags-mcp",
-  "description": "Six Flags MCP server for Claude — live wait times, park hours, shows, and day planning (Carowinds and the whole chain)",
+  "description": "Six Flags MCP server for Claude \u2014 live wait times, park hours, shows, and day planning (Carowinds and the whole chain)",
   "author": "Claude Code (AI) <https://www.anthropic.com/claude>",
   "repository": {
     "type": "git",
@@ -28,11 +28,8 @@
     "bundle": "esbuild src/index.ts --bundle --platform=node --format=esm --external:dotenv --banner:js='import { createRequire as __createRequire } from \"module\"; const require = __createRequire(import.meta.url);' --outfile=dist/bundle.js",
     "dev": "node --env-file=.env dist/index.js",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage && npm run worker:test",
-    "test:watch": "vitest",
-    "worker:dev": "wrangler dev",
-    "worker:deploy": "wrangler deploy",
-    "worker:test": "vitest run --config vitest.workers.config.ts"
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@chrischall/mcp-utils": "^0.13.3",
@@ -41,16 +38,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@chrischall/mcp-connector": "^1.1.1",
-    "@cloudflare/vitest-pool-workers": "^0.19.0",
-    "@cloudflare/workers-oauth-provider": "^0.8.1",
-    "@cloudflare/workers-types": "^5.20260726.1",
     "@types/node": "^26.0.0",
     "@vitest/coverage-v8": "^4.1.7",
-    "agents": "^0.19.0",
     "esbuild": "^0.28.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.7",
-    "wrangler": "^4.110.0"
+    "vitest": "^4.1.7"
   }
 }
