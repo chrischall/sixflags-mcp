@@ -108,15 +108,15 @@ cookie/reCAPTCHA-bound, Track A (fetchproxy) is the answer and Track B closes.
 
 ## Guardrails to carry forward (do not drop these)
 
-This connector is **public and shared with other people**, and its deployed
-login page currently promises *"No credentials are collected or stored."*
+Whatever serves this publicly is shared with other people, and its login
+surface has always promised *"No credentials are collected or stored."*
 Therefore:
 
 - **Prefer fetchproxy (Track A): nothing collected, nothing stored.** That is
   both the best architectural fit and the cleanest privacy posture.
 - If Track B ever leads to credential collection, it must be **consented and
-  disclosed** at the point of entry, and the privacy note in `src/sixflags-auth.ts`
-  must be rewritten in the *same* PR. No silent capture behind the current
+  disclosed** at the point of entry, and whatever login surface collects it
+  must say so in the *same* PR. No silent capture behind the current
   promise.
 - Store a **token**, never the raw password — and keep the password only if the
   token genuinely needs periodic re-minting (the `ofw` reason: expiring token,
@@ -139,4 +139,4 @@ Therefore:
       token model in this doc.
 - [ ] Choose architecture per the Track B decision gate.
 - [ ] Build read-only tools first; gate any writes.
-- [ ] If any credential collection: update `sixflags-auth.ts` privacy note +
+- [ ] If any credential collection: update the login surface's privacy note

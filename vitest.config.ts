@@ -1,4 +1,4 @@
-import { configDefaults, defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
 // Coverage-enforced: `npm run test:coverage` (wired into CI) fails the build on
 // any regression below 100%. Genuinely-unreachable defensive branches are
