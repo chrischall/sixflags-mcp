@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/chrischall/sixflags-mcp/compare/v1.0.2...v1.0.3) (2026-08-09)
+
+
+### Refactor
+
+* **connector:** retire the standalone Cloudflare Worker connector ([#39](https://github.com/chrischall/sixflags-mcp/issues/39)) ([e14d39e](https://github.com/chrischall/sixflags-mcp/commit/e14d39e968273816e54134e06ec0c71a45952647))
+
 ## [1.0.2](https://github.com/chrischall/sixflags-mcp/compare/v1.0.1...v1.0.2) (2026-07-27)
 
 
