@@ -1,0 +1,27 @@
+version: 1
+name: Six Flags
+slug: sixflags
+summary: >-
+  Six Flags MCP for Claude — live wait times, park hours, shows, and day
+  planning for Carowinds and the whole chain
+env:
+  - name: SIXFLAGS_HOME_PARK
+    required: false
+    help: >-
+      Default park for tools that don't name one. A park name, themeparks.wiki
+      slug, or park id. Defaults to Carowinds.
+  - name: SIXFLAGS_REQUEST_TIMEOUT_MS
+    required: false
+    help: >-
+      Per-request timeout in milliseconds. Raise it if calls time out on slow
+      upstream responses.
+  - name: SIXFLAGS_USER_AGENT
+    required: false
+    help: >-
+      Overrides the User-Agent sent upstream. Leave unset unless the service
+      requires a specific one.
+egress:
+  allow:
+    # Only hosts the SERVER process actually fetches. Hosts that appear
+    # solely in a URL this server BUILDS and returns are excluded.
+    - api.themeparks.wiki
