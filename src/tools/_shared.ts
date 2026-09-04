@@ -3,8 +3,10 @@ import { z } from 'zod';
 import type { SixFlagsClient } from '../client.js';
 import type { Park } from '../parks.js';
 
-// Pretty-printed JSON tool result. Thin wrapper over the fleet's `minifiedResult`
-// so the tool modules keep a local, intention-revealing name.
+// Minified JSON tool result — one line, no indentation. Thin wrapper over the
+// fleet's `minifiedResult` so the tool modules keep a local, intention-revealing
+// name. (This comment said "pretty-printed" until the switch to
+// `minifiedResult`; indentation is tokens the caller pays for and never reads.)
 export const jsonResponse = minifiedResult;
 
 // ---- themeparks.wiki /live schema -----------------------------------------
