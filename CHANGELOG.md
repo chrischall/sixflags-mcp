@@ -5,7 +5,7 @@
 
 ### Features
 
-* **tools:** compact by default — strip media URLs, and minify every response ([#66](https://github.com/chrischall/sixflags-mcp/issues/66)) ([96ecd64](https://github.com/chrischall/sixflags-mcp/commit/96ecd64de5fe4e1d0ee6d58a71f9c07c247149d4))
+* **tools:** minify every response — no formatting whitespace on any payload ([#66](https://github.com/chrischall/sixflags-mcp/issues/66)) ([96ecd64](https://github.com/chrischall/sixflags-mcp/commit/96ecd64de5fe4e1d0ee6d58a71f9c07c247149d4))
 
 
 ### Documentation
