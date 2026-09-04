@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/chrischall/sixflags-mcp/compare/v1.0.3...v1.1.0) (2026-09-04)
+
+
+### Features
+
+* **tools:** compact by default — strip media URLs, and minify every response ([#66](https://github.com/chrischall/sixflags-mcp/issues/66)) ([96ecd64](https://github.com/chrischall/sixflags-mcp/commit/96ecd64de5fe4e1d0ee6d58a71f9c07c247149d4))
+
+
+### Documentation
+
+* **tools:** jsonResponse minifies, so stop calling it pretty-printed ([#69](https://github.com/chrischall/sixflags-mcp/issues/69)) ([292326b](https://github.com/chrischall/sixflags-mcp/commit/292326ba897b5e9efd9aa512d410bb16cdabc162))
+
 ## [1.0.3](https://github.com/chrischall/sixflags-mcp/compare/v1.0.2...v1.0.3) (2026-08-09)
 
 
