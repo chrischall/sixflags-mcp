@@ -50,6 +50,12 @@ Public, keyless, free. No login, no rate-limit headaches at our volume (`createA
 
 Every JSON response is validated at the call site with `parseLenient(schema, raw, { label: 'sixflags-mcp', context })` from `@chrischall/mcp-utils`. Schemas are `z.looseObject(...)` covering only the fields we read (unknown keys pass through). Lenient mode: on a shape mismatch it warns to stderr and returns the raw response, which then flows through the `?? fallback` chains — an upstream change degrades gracefully rather than crashing. When adding an endpoint, define a loose schema next to the call and wrap the request.
 
+## Response shape — minified, and deliberately no `view` parameter
+
+`jsonResponse` (`tools/_shared.ts`) is `minifiedResult` from `@chrischall/mcp-utils`: every tool result is one line of JSON with no indentation. Indentation is tokens the caller pays for and never reads.
+
+There is **no `view: compact | full` parameter here, and that is a decision, not an omission.** The fleet's `view` rung strips image/avatar URLs out of an upstream payload that a server hands back close to verbatim. No tool in this repo does that: all seven reads re-project themeparks.wiki's response field by field into a fresh object literal (`parks.ts`, `waittimes.ts`, `attractions.ts`, `health.ts`), and none of those literals carries a media field — themeparks.wiki's `/v1/destinations`, `/v1/entity/{id}/children`, `/v1/entity/{id}/schedule` and `/v1/entity/{id}/live` emit none. A `view` here would be a parameter whose `compact` and `full` rungs are byte-identical, which is worse than no parameter: it advertises a saving it cannot make. A `src/view.ts` was added by a fleet rollout and removed for exactly this reason; if a future endpoint does start returning media URLs, re-add it wired to *that* tool rather than to all of them.
+
 ## Park resolution
 
 `ParkDirectory.resolve(ref?)` priority: exact park id → exact name/slug → unique name/destination substring → error (ambiguous lists the matches; unknown points at `sixflags_list_parks`). `undefined` resolves `directory.configuredHomePark`, itself run through the same matcher. The directory memoizes `/v1/destinations` for 12h (injectable clock for tests).
