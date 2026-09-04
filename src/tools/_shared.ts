@@ -1,11 +1,11 @@
-import { parseLenient, textResult } from '@chrischall/mcp-utils';
+import { minifiedResult, parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { SixFlagsClient } from '../client.js';
 import type { Park } from '../parks.js';
 
-// Pretty-printed JSON tool result. Thin wrapper over the fleet's `textResult`
+// Pretty-printed JSON tool result. Thin wrapper over the fleet's `minifiedResult`
 // so the tool modules keep a local, intention-revealing name.
-export const jsonResponse = textResult;
+export const jsonResponse = minifiedResult;
 
 // ---- themeparks.wiki /live schema -----------------------------------------
 
