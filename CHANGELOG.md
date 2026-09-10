@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1](https://github.com/chrischall/sixflags-mcp/compare/v1.1.0...v1.1.1) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** @chrischall/mcp-utils 0.26.1 ([#78](https://github.com/chrischall/sixflags-mcp/issues/78)) ([54de689](https://github.com/chrischall/sixflags-mcp/commit/54de689fad9cf03132d3f79e5993fb510c6ecf37))
+* **deps:** bump hono from 4.13.1 to 4.13.7 ([#76](https://github.com/chrischall/sixflags-mcp/issues/76)) ([b520776](https://github.com/chrischall/sixflags-mcp/commit/b5207768d1c50c805c16533b3438cccabff0bbb2))
+* **deps:** declare the peer floors mcp-utils 0.26.1 requires ([#79](https://github.com/chrischall/sixflags-mcp/issues/79)) ([1efda02](https://github.com/chrischall/sixflags-mcp/commit/1efda02f18ae277859d21496181b0f9214caa3c1))
+
 ## [1.1.0](https://github.com/chrischall/sixflags-mcp/compare/v1.0.3...v1.1.0) (2026-09-04)
 
 
