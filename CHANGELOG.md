@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/chrischall/sixflags-mcp/compare/v2.0.0...v2.1.0) (2026-09-19)
+
+
+### Features
+
+* **deps:** take mcp-utils 1.0.0, and raise this repo's node floor to match ([#86](https://github.com/chrischall/sixflags-mcp/issues/86)) ([cafd0e8](https://github.com/chrischall/sixflags-mcp/commit/cafd0e876aec3e58a5bf84a8c37878d78a060ab2))
+
+
+### Bug Fixes
+
+* **deps:** raise the manifest node floor to match mcp-utils 1.0.0 ([#88](https://github.com/chrischall/sixflags-mcp/issues/88)) ([7f3601d](https://github.com/chrischall/sixflags-mcp/commit/7f3601da9f77e170ad051d152c4f673360cdf440))
+
 ## [2.0.0](https://github.com/chrischall/sixflags-mcp/compare/v1.1.1...v2.0.0) (2026-09-19)
 
 
