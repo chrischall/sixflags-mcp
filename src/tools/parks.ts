@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { ParkDirectory } from '../parks.js';
@@ -54,12 +54,12 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
     {
       description:
         'List Six Flags parks (the combined Six Flags / Cedar Fair chain, including Carowinds, Cedar Point, Canada’s Wonderland, Magic Mountain, and the Hurricane Harbor water parks). Optionally filter by a name substring. Returns each park’s id, name, and owning destination, and flags your configured home park.',
-      inputSchema: {
+      inputSchema: z.object({
         search: z
           .string()
           .describe('Case-insensitive substring to filter park or destination names')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ search }: { search?: string }) => {
@@ -89,7 +89,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
     {
       description:
         'Get operating hours (open/close times) for a Six Flags park, from today forward. Defaults to your home park. Use this to plan what time to arrive and how long you have.',
-      inputSchema: {
+      inputSchema: z.object({
         park: z
           .string()
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
@@ -101,7 +101,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .max(60)
           .describe('How many days ahead to include (default 10)')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ park, days }: { park?: string; days?: number }) => {

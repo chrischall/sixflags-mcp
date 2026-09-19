@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { ParkDirectory } from '../parks.js';
@@ -25,7 +25,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
     {
       description:
         'List the attractions (or shows / restaurants) at a Six Flags park — the full directory of what’s there, with map coordinates. Static metadata, not live status; use sixflags_get_wait_times for current waits. Defaults to your home park (Carowinds).',
-      inputSchema: {
+      inputSchema: z.object({
         park: z
           .string()
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
@@ -34,7 +34,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
           .enum(['ATTRACTION', 'SHOW', 'RESTAURANT'])
           .describe('Which kind of entity to list (default ATTRACTION)')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ park, type }: { park?: string; type?: 'ATTRACTION' | 'SHOW' | 'RESTAURANT' }) => {
@@ -75,12 +75,12 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
     {
       description:
         'Get today’s live show schedule (showtimes) for a Six Flags park — parades, stunt shows, character meets. Defaults to your home park (Carowinds). Showtimes are only populated on operating days.',
-      inputSchema: {
+      inputSchema: z.object({
         park: z
           .string()
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ park }: { park?: string }) => {
