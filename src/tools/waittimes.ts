@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import type { ParkDirectory } from '../parks.js';
 import {
@@ -38,7 +38,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
     {
       description:
         'Get current ride wait times for a Six Flags park (defaults to your home park, Carowinds). Returns every attraction with its status (operating/closed/down) and standby + single-rider waits, sorted longest-wait first, plus a summary of the park’s crowd level.',
-      inputSchema: {
+      inputSchema: z.object({
         park: z
           .string()
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
@@ -47,7 +47,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .boolean()
           .describe('Only return currently-operating rides (default false: include closed/down)')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({ park, openOnly }: { park?: string; openOnly?: boolean }) => {
@@ -70,7 +70,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
     {
       description:
         'Recommend which attraction to ride next: ranks currently-operating rides by shortest standby wait. Optionally exclude rides you’ve already done and cap the wait. Use this repeatedly through the day to keep hopping to the lowest-wait ride. Defaults to your home park (Carowinds).',
-      inputSchema: {
+      inputSchema: z.object({
         park: z
           .string()
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
@@ -92,7 +92,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .max(25)
           .describe('How many suggestions to return (default 5)')
           .optional(),
-      },
+      }),
       annotations: { readOnlyHint: true },
     },
     async ({

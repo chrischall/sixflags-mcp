@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import { messageOf } from '@chrischall/mcp-utils';
 import type { ParkDirectory } from '../parks.js';
 import { jsonResponse } from './_shared.js';
