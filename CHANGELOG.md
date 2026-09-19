@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/chrischall/sixflags-mcp/compare/v1.1.1...v2.0.0) (2026-09-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mcp:** migrate server to SDK v2 ([#82](https://github.com/chrischall/sixflags-mcp/issues/82))
+
+### Features
+
+* **mcp:** migrate server to SDK v2 ([#82](https://github.com/chrischall/sixflags-mcp/issues/82)) ([1d6def0](https://github.com/chrischall/sixflags-mcp/commit/1d6def07bdca13906ae74166854390b3bc188aba))
+
 ## [1.1.1](https://github.com/chrischall/sixflags-mcp/compare/v1.1.0...v1.1.1) (2026-09-10)
 
 
