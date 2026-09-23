@@ -120,6 +120,13 @@ export class ParkDirectory {
     }
     parks.sort((a, b) => a.name.localeCompare(b.name));
 
+    // Never cache an empty directory. An empty/204 body or schema drift that
+    // drops every record degrades to [] (see lenient.ts), and every tool
+    // resolves a park first — caching [] for the TTL would fail them all long
+    // after upstream recovers. Leaving the cache untouched makes the next call
+    // refetch instead of serving [] until the TTL expires.
+    if (parks.length === 0) return parks;
+
     this.cache = { parks, fetchedAt: this.now() };
     return parks;
   }

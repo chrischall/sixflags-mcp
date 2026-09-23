@@ -64,6 +64,23 @@ describe('ParkDirectory.list', () => {
     }
   });
 
+  it('does not cache an empty directory, so the next call refetches and resolves', async () => {
+    // A transient 204 / empty 200, or drift that drops every record, must not
+    // pin an empty directory for the 12h TTL: every tool resolves a park first,
+    // so a cached [] would fail them all until expiry.
+    for (const body of [undefined, null, {}, { destinations: 'nope' }, { destinations: [{ slug: 'sixflags_destination_CW' }] }]) {
+      const { directory, spy } = makeDirectory();
+      spy.mockResolvedValueOnce(body as never);
+      expect(await directory.list()).toEqual([]);
+      const park = await directory.resolve('Carowinds');
+      expect(park.name).toBe('Carowinds');
+      expect(spy).toHaveBeenCalledTimes(2);
+      // The populated directory IS cached.
+      await directory.list();
+      expect(spy).toHaveBeenCalledTimes(2);
+    }
+  });
+
   it('excludes destinations divested to Enchanted Parks, with all their parks', async () => {
     // Upstream still tags these `sixflags_destination_*` though the parks left
     // the chain, so the slug-prefix filter alone lets them through. Six Flags
