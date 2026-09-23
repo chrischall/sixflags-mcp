@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.2](https://github.com/chrischall/sixflags-mcp/compare/v2.1.1...v2.1.2) (2026-09-23)
+
+
+### Bug Fixes
+
+* log a warning when a malformed optional Six Flags field is nulled ([#95](https://github.com/chrischall/sixflags-mcp/issues/95)) ([7d45445](https://github.com/chrischall/sixflags-mcp/commit/7d45445f772071193268c1c1f375b896cc7cb542)), closes [#93](https://github.com/chrischall/sixflags-mcp/issues/93)
+* survive malformed or empty Six Flags upstream responses and a misconfigured home park ([#92](https://github.com/chrischall/sixflags-mcp/issues/92)) ([c6be6e6](https://github.com/chrischall/sixflags-mcp/commit/c6be6e646108cb74d093b1dd8295e24c9d8f33c8))
+
 ## [2.1.1](https://github.com/chrischall/sixflags-mcp/compare/v2.1.0...v2.1.1) (2026-09-23)
 
 
