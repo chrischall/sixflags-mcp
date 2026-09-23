@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/chrischall/sixflags-mcp/compare/v2.1.0...v2.1.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **deps:** require zod ^4.6.5 to match @chrischall/mcp-utils 2.4.0 ([#91](https://github.com/chrischall/sixflags-mcp/issues/91)) ([2865dd9](https://github.com/chrischall/sixflags-mcp/commit/2865dd96c231494a0131f4f0d938afa74d2d7345))
+* **deps:** upgrade @chrischall/mcp-utils to 2.4.0 and @fetchproxy/* to 3.2.0 ([#89](https://github.com/chrischall/sixflags-mcp/issues/89)) ([209d92e](https://github.com/chrischall/sixflags-mcp/commit/209d92ed67c5df289ec94f85f9c117ec42f0d058))
+
 ## [2.1.0](https://github.com/chrischall/sixflags-mcp/compare/v2.0.0...v2.1.0) (2026-09-19)
 
 
