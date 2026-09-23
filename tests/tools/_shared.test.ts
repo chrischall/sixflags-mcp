@@ -32,8 +32,9 @@ describe('normalizeAttractions', () => {
     ]);
   });
 
-  it('handles a null liveData array', () => {
-    expect(normalizeAttractions({ id: 'p', name: 'P' } as Live)).toEqual([]);
+  it('handles an absent or null liveData array (the schema reads it as empty)', () => {
+    expect(normalizeAttractions(liveResponseSchema.parse({ id: 'p', name: 'P' }))).toEqual([]);
+    expect(normalizeAttractions(liveResponseSchema.parse({ liveData: null }))).toEqual([]);
   });
 });
 
@@ -53,7 +54,7 @@ describe('anyRideOperating', () => {
   });
 
   it('is false when liveData is absent', () => {
-    expect(anyRideOperating({ id: 'p', name: 'P' } as Live)).toBe(false);
+    expect(anyRideOperating(liveResponseSchema.parse({ id: 'p', name: 'P' }))).toBe(false);
   });
 
   it('is false for a statusless attraction', () => {
