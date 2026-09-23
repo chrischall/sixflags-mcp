@@ -34,6 +34,38 @@ describe('sixflags_list_parks', () => {
     await h.close();
   });
 
+  it('still lists the parks when the configured home park is ambiguous or unknown', async () => {
+    // resolve() throws for these, and its hint points at sixflags_list_parks —
+    // so list_parks must not throw the same error back.
+    // 'Cedar' is ambiguous (Cedar Point / Cedar Point Shores); 'Great Escape'
+    // was divested and filtered out of the directory.
+    for (const ref of ['Cedar', 'Great Escape']) {
+      const h = await harnessFor({}, { homePark: ref });
+      const res = await h.callTool('sixflags_list_parks', {});
+      expect(res.isError, ref).toBeFalsy();
+      const data = parseToolResult<{
+        homePark: { configuredAs: string; error?: string; name?: string };
+        count: number;
+        parks: { isHomePark: boolean }[];
+      }>(res);
+      expect(data.count).toBe(5);
+      expect(data.homePark.configuredAs).toBe(ref);
+      expect(data.homePark.error).toMatch(ref === 'Cedar' ? /matches multiple/ : /No Six Flags park matches/);
+      expect(data.homePark.name).toBeUndefined();
+      expect(data.parks.every((p) => !p.isHomePark)).toBe(true);
+      await h.close();
+    }
+  });
+
+  it('still propagates an unexpected (non-tool) failure from resolving the home park', async () => {
+    const { directory } = makeDirectory();
+    vi.spyOn(directory, 'resolve').mockRejectedValue(new Error('upstream down'));
+    const h = await createTestHarness((s) => registerParkTools(s, directory));
+    const res = await h.callTool('sixflags_list_parks', {});
+    expect(res.isError).toBe(true);
+    await h.close();
+  });
+
   it('filters by a search substring', async () => {
     const h = await harnessFor();
     const data = parseToolResult<{ count: number; parks: { name: string }[] }>(

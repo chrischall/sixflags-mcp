@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/server';
+import { McpToolError } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
@@ -62,7 +63,19 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
     },
     async ({ search }: { search?: string }) => {
       const all = await directory.list();
-      const home = await directory.resolve();
+      // A misconfigured home park (unknown, divested, or ambiguous) makes
+      // resolve() throw with a hint pointing HERE — so report it instead of
+      // failing, and still list the parks the user needs to pick a valid one.
+      const configuredAs = directory.configuredHomePark;
+      let homePark: { name: string; parkId: string; configuredAs: string } | { configuredAs: string; error: string };
+      try {
+        const home = await directory.resolve();
+        homePark = { name: home.name, parkId: home.parkId, configuredAs };
+      } catch (err) {
+        if (!(err instanceof McpToolError)) throw err;
+        homePark = { configuredAs, error: err.message };
+      }
+      const homeId = 'parkId' in homePark ? homePark.parkId : undefined;
       const q = search?.trim().toLowerCase();
       const parks = q
         ? all.filter(
@@ -70,13 +83,13 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           )
         : all;
       return jsonResponse({
-        homePark: { name: home.name, parkId: home.parkId, configuredAs: directory.configuredHomePark },
+        homePark,
         count: parks.length,
         parks: parks.map((p) => ({
           parkId: p.parkId,
           name: p.name,
           destination: p.destination,
-          isHomePark: p.parkId === home.parkId,
+          isHomePark: p.parkId === homeId,
         })),
       });
     },
