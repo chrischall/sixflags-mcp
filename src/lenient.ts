@@ -13,15 +13,24 @@ import { z } from 'zod';
 
 const LABEL = 'sixflags-mcp';
 
-function describeIssues(error: z.ZodError): string {
+function describeIssues(error: { issues: readonly z.core.$ZodIssue[] }): string {
   return error.issues
     .map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
     .join('; ');
 }
 
-/** An optional field: absent, null, or malformed all read as null. */
+/**
+ * An optional field: absent, null, or malformed all read as null. A malformed
+ * value is logged (as {@link lenientArray} logs a dropped element) so upstream
+ * drift is visible rather than silently erased.
+ */
 export function opt<T extends z.ZodType>(schema: T) {
-  return schema.nullish().catch(null);
+  return schema.nullish().catch(({ error }) => {
+    console.error(
+      `[${LABEL}] WARNING: nulling malformed optional field. ${describeIssues(error)}`,
+    );
+    return null;
+  });
 }
 
 /**
