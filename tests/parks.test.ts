@@ -37,6 +37,33 @@ describe('ParkDirectory.list', () => {
     expect(await directory.list()).toEqual([]);
   });
 
+  it('drops a nameless or slugless-typed destination / park instead of crashing', async () => {
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          { id: 'd-bad', slug: 'sixflags_destination_BAD', parks: [{ id: 'p-bad', name: 'Nameless Dest' }] }, // no name
+          { id: 'd-num', name: 'Numeric Slug', slug: 42, parks: [{ id: 'p-num', name: 'Numeric Slug' }] },
+          {
+            id: 'd-cw',
+            name: 'Carowinds',
+            slug: 'sixflags_destination_CW',
+            parks: [{ id: 'p-cw', name: 'Carowinds' }, { id: 'p-noname' }, 'junk'],
+          },
+          'junk',
+        ],
+      },
+    });
+    expect((await directory.list()).map((p) => p.name)).toEqual(['Carowinds']);
+  });
+
+  it('degrades to an empty list on an empty (undefined) or non-object body', async () => {
+    for (const body of [undefined, null, 'oops', []]) {
+      const { directory, spy } = makeDirectory();
+      spy.mockResolvedValue(body as never);
+      expect(await directory.list()).toEqual([]);
+    }
+  });
+
   it('excludes destinations divested to Enchanted Parks, with all their parks', async () => {
     // Upstream still tags these `sixflags_destination_*` though the parks left
     // the chain, so the slug-prefix filter alone lets them through. Six Flags

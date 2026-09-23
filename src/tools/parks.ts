@@ -1,22 +1,20 @@
 import { McpServer } from '@modelcontextprotocol/server';
-import { parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
+import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
 import { jsonResponse } from './_shared.js';
 
 const scheduleEntrySchema = z.looseObject({
   date: z.string(),
-  type: z.string().nullish(),
-  openingTime: z.string().nullish(),
-  closingTime: z.string().nullish(),
-  description: z.string().nullish(),
+  type: opt(z.string()),
+  openingTime: opt(z.string()),
+  closingTime: opt(z.string()),
+  description: opt(z.string()),
 });
 
 const scheduleResponseSchema = z.looseObject({
-  id: z.string(),
-  name: z.string(),
-  timezone: z.string().nullish(),
-  schedule: z.array(scheduleEntrySchema).nullish(),
+  timezone: opt(z.string()),
+  schedule: lenientArray(scheduleEntrySchema, 'schedule'),
 });
 
 // Today's date (YYYY-MM-DD) in the park's own timezone — so "today's hours"
@@ -110,15 +108,12 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
         'GET',
         `/v1/entity/${resolved.parkId}/schedule`,
       );
-      const data = parseLenient(scheduleResponseSchema, raw, {
-        label: 'sixflags-mcp',
-        context: 'schedule response',
-      });
+      const data = parseResponse(scheduleResponseSchema, raw, 'schedule response');
 
       const tz = data.timezone ?? null;
       const today = parkToday(tz);
       const horizon = addDays(today, days ?? 10);
-      const entries = (data.schedule ?? [])
+      const entries = data.schedule
         .filter((e) => e.date >= today && e.date <= horizon)
         .sort((a, b) => a.date.localeCompare(b.date));
 

@@ -1,6 +1,7 @@
-import { minifiedResult, parseLenient } from '@chrischall/mcp-utils';
+import { minifiedResult } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { SixFlagsClient } from '../client.js';
+import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { Park } from '../parks.js';
 
 // Minified JSON tool result — one line, no indentation. Thin wrapper over the
@@ -13,34 +14,33 @@ export const jsonResponse = minifiedResult;
 
 // A queue kind (STANDBY / SINGLE_RIDER). `waitTime` is minutes, or null/absent
 // when the ride is closed or the wait is unpublished.
-const queueEntrySchema = z.looseObject({ waitTime: z.number().nullish() });
+// Validated per record (see lenient.ts): an entry without a name is dropped,
+// and a malformed optional field (status, queue, showtime…) reads as null.
+const queueEntrySchema = z.looseObject({ waitTime: opt(z.number()) });
 
 const showtimeSchema = z.looseObject({
-  type: z.string().nullish(),
-  startTime: z.string().nullish(),
-  endTime: z.string().nullish(),
+  type: opt(z.string()),
+  startTime: opt(z.string()),
+  endTime: opt(z.string()),
 });
 
 const liveEntrySchema = z.looseObject({
-  id: z.string(),
   name: z.string(),
-  entityType: z.string().nullish(),
-  status: z.string().nullish(),
-  lastUpdated: z.string().nullish(),
-  queue: z
-    .looseObject({
-      STANDBY: queueEntrySchema.nullish(),
-      SINGLE_RIDER: queueEntrySchema.nullish(),
-    })
-    .nullish(),
-  showtimes: z.array(showtimeSchema).nullish(),
+  entityType: opt(z.string()),
+  status: opt(z.string()),
+  lastUpdated: opt(z.string()),
+  queue: opt(
+    z.looseObject({
+      STANDBY: opt(queueEntrySchema),
+      SINGLE_RIDER: opt(queueEntrySchema),
+    }),
+  ),
+  showtimes: lenientArray(showtimeSchema, 'showtimes'),
 });
 
 export const liveResponseSchema = z.looseObject({
-  id: z.string(),
-  name: z.string(),
-  timezone: z.string().nullish(),
-  liveData: z.array(liveEntrySchema).nullish(),
+  timezone: opt(z.string()),
+  liveData: lenientArray(liveEntrySchema, 'liveData'),
 });
 export type LiveEntry = z.infer<typeof liveEntrySchema>;
 
@@ -50,10 +50,7 @@ export async function fetchLive(
   park: Park,
 ): Promise<z.infer<typeof liveResponseSchema>> {
   const raw = await client.request<unknown>('GET', `/v1/entity/${park.parkId}/live`);
-  return parseLenient(liveResponseSchema, raw, {
-    label: 'sixflags-mcp',
-    context: 'live response',
-  });
+  return parseResponse(liveResponseSchema, raw, 'live response');
 }
 
 // ---- normalized shapes the tools return -----------------------------------
@@ -82,7 +79,7 @@ function isAttraction(e: LiveEntry): boolean {
 export function normalizeAttractions(
   live: z.infer<typeof liveResponseSchema>,
 ): NormalizedAttraction[] {
-  return (live.liveData ?? []).filter(isAttraction).map((e) => {
+  return live.liveData.filter(isAttraction).map((e) => {
     const status = (e.status ?? 'UNKNOWN').toUpperCase();
     const wait = e.queue?.STANDBY?.waitTime;
     const single = e.queue?.SINGLE_RIDER?.waitTime;
@@ -99,7 +96,7 @@ export function normalizeAttractions(
 
 /** Whether a live response reports at least one currently-running ride. */
 export function anyRideOperating(live: z.infer<typeof liveResponseSchema>): boolean {
-  return (live.liveData ?? []).some(
+  return live.liveData.some(
     (e) => isAttraction(e) && (e.status ?? '').toUpperCase() === OPERATING,
   );
 }

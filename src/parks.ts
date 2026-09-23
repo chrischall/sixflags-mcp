@@ -1,7 +1,8 @@
-import { McpToolError, parseLenient } from '@chrischall/mcp-utils';
+import { McpToolError } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { SixFlagsClient } from './client.js';
 import { getHomePark } from './config.js';
+import { lenientArray, opt, parseResponse } from './lenient.js';
 
 // themeparks.wiki groups everything under "destinations". Since the
 // Six Flags / Cedar Fair merger, every park in the combined chain carries a
@@ -34,16 +35,16 @@ const DIVESTED_DESTINATION_SLUGS = new Set([
 
 // The live/schedule/children endpoints key off the PARK entity id (the id
 // inside `parks[]`), NOT the destination id — mixing them up 404s.
+// Validated per record (see lenient.ts): a destination or park missing a name
+// or id is dropped rather than failing the whole directory.
 const destinationsSchema = z.looseObject({
-  destinations: z.array(
+  destinations: lenientArray(
     z.looseObject({
-      id: z.string(),
       name: z.string(),
-      slug: z.string().nullish(),
-      parks: z
-        .array(z.looseObject({ id: z.string(), name: z.string() }))
-        .nullish(),
+      slug: opt(z.string()),
+      parks: lenientArray(z.looseObject({ id: z.string(), name: z.string() }), 'destination parks'),
     }),
+    'destinations',
   ),
 });
 
@@ -104,19 +105,16 @@ export class ParkDirectory {
     if (cached && this.now() - cached.fetchedAt < CACHE_TTL_MS) return cached.parks;
 
     const raw = await this.client.request<unknown>('GET', '/v1/destinations');
-    const data = parseLenient(destinationsSchema, raw, {
-      label: 'sixflags-mcp',
-      context: 'destinations response',
-    });
+    const data = parseResponse(destinationsSchema, raw, 'destinations response');
 
     const parks: Park[] = [];
-    for (const dest of data.destinations ?? []) {
+    for (const dest of data.destinations) {
       const slug = dest.slug;
       if (!slug) continue;
       const normalizedSlug = slug.toLowerCase();
       if (!normalizedSlug.startsWith(SIXFLAGS_SLUG_PREFIX)) continue;
       if (DIVESTED_DESTINATION_SLUGS.has(normalizedSlug)) continue;
-      for (const park of dest.parks ?? []) {
+      for (const park of dest.parks) {
         parks.push({ parkId: park.id, name: park.name, destination: dest.name, slug });
       }
     }

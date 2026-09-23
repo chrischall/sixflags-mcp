@@ -1,22 +1,18 @@
 import { McpServer } from '@modelcontextprotocol/server';
-import { parseLenient } from '@chrischall/mcp-utils';
 import { z } from 'zod';
+import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
 import { fetchLive, jsonResponse } from './_shared.js';
 
 const childSchema = z.looseObject({
   id: z.string(),
   name: z.string(),
-  entityType: z.string().nullish(),
-  location: z
-    .looseObject({ latitude: z.number().nullish(), longitude: z.number().nullish() })
-    .nullish(),
+  entityType: opt(z.string()),
+  location: opt(z.looseObject({ latitude: opt(z.number()), longitude: opt(z.number()) })),
 });
 
 const childrenResponseSchema = z.looseObject({
-  id: z.string(),
-  name: z.string(),
-  children: z.array(childSchema).nullish(),
+  children: lenientArray(childSchema, 'children'),
 });
 
 export function registerAttractionTools(server: McpServer, directory: ParkDirectory): void {
@@ -43,13 +39,10 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
         'GET',
         `/v1/entity/${resolved.parkId}/children`,
       );
-      const data = parseLenient(childrenResponseSchema, raw, {
-        label: 'sixflags-mcp',
-        context: 'children response',
-      });
+      const data = parseResponse(childrenResponseSchema, raw, 'children response');
 
       const want = type ?? 'ATTRACTION';
-      const items = (data.children ?? [])
+      const items = data.children
         .filter((c) => (c.entityType ?? '').toUpperCase() === want)
         .map((c) => ({
           id: c.id,
@@ -87,12 +80,12 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
       const resolved = await directory.resolve(park);
       const live = await fetchLive(directory.client, resolved);
 
-      const shows = (live.liveData ?? [])
+      const shows = live.liveData
         .filter((e) => (e.entityType ?? '').toUpperCase() === 'SHOW')
         .map((e) => ({
           name: e.name,
           status: (e.status ?? 'UNKNOWN').toUpperCase(),
-          showtimes: (e.showtimes ?? []).map((s) => ({
+          showtimes: e.showtimes.map((s) => ({
             type: s.type ?? null,
             startTime: s.startTime ?? null,
             endTime: s.endTime ?? null,
