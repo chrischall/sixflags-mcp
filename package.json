@@ -1,6 +1,6 @@
 {
   "name": "sixflags-mcp",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "license": "MIT",
   "mcpName": "io.github.chrischall/sixflags-mcp",
   "description": "Six Flags MCP server for Claude — live wait times, park hours, shows, and day planning (Carowinds and the whole chain)",

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.3](https://github.com/chrischall/sixflags-mcp/compare/v2.1.2...v2.1.3) (2026-09-24)
+
+
+### Bug Fixes
+
+* **deps:** bump dotenv in the production-majors group ([#98](https://github.com/chrischall/sixflags-mcp/issues/98)) ([cafad69](https://github.com/chrischall/sixflags-mcp/commit/cafad695991bd58be20ceaedd25245f16dc5d814))
+
 ## [2.1.2](https://github.com/chrischall/sixflags-mcp/compare/v2.1.1...v2.1.2) (2026-09-23)
 
 
