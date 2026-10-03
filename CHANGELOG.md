@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.1.4](https://github.com/chrischall/sixflags-mcp/compare/v2.1.3...v2.1.4) (2026-10-03)
+
+
+### Bug Fixes
+
+* **deps:** bump @chrischall/mcp-utils to 2.10.0 ([#103](https://github.com/chrischall/sixflags-mcp/issues/103)) ([8cf7f07](https://github.com/chrischall/sixflags-mcp/commit/8cf7f07fc0e11095f844777ed5f71f223b81f2ed))
+* **deps:** bump @chrischall/mcp-utils to 2.12.0 ([#104](https://github.com/chrischall/sixflags-mcp/issues/104)) ([8d7b6c7](https://github.com/chrischall/sixflags-mcp/commit/8d7b6c77881ae2d90488beda40f08ff81370c8cf))
+* **deps:** bump @chrischall/mcp-utils to 2.13.0 ([#106](https://github.com/chrischall/sixflags-mcp/issues/106)) ([fa1ae68](https://github.com/chrischall/sixflags-mcp/commit/fa1ae68d1d586ca2f9d69e39b54d30236792854e))
+* **deps:** bump dotenv in the production-dependencies group ([#100](https://github.com/chrischall/sixflags-mcp/issues/100)) ([f2a9f62](https://github.com/chrischall/sixflags-mcp/commit/f2a9f624f9da6697ed55fc89d13fd511b52c47f6))
+* report CDN/WAF blocks as edge_blocked, not a rejected credential (mcp-utils 2.9.0) ([#102](https://github.com/chrischall/sixflags-mcp/issues/102)) ([08d1bc8](https://github.com/chrischall/sixflags-mcp/commit/08d1bc841f2bf4e00ea4ba06101a1aaca6fc1390))
+
+
+### Documentation
+
+* replace restated PR policy with the fleet-policy pointer ([#105](https://github.com/chrischall/sixflags-mcp/issues/105)) ([0eb5e26](https://github.com/chrischall/sixflags-mcp/commit/0eb5e263cf8e076a7d15b8cf3c918dff70487aeb))
+
 ## [2.1.3](https://github.com/chrischall/sixflags-mcp/compare/v2.1.2...v2.1.3) (2026-09-24)
 
 
