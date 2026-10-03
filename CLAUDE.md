@@ -80,15 +80,19 @@ SIXFLAGS_USER_AGENT           Optional. User-Agent sent to themeparks.wiki.
 
 Packaging: `manifest.json` (mcpb), `server.json` (MCP registry — description **≤ 100 chars**), `.claude-plugin/{plugin,marketplace}.json`, `.mcp.json`, `skills/sixflags/SKILL.md`, `.mcpbignore`.
 
-Versioning is **release-please** — do NOT hand-bump. The version lives in `package.json`, `src/version.ts` (`// x-release-please-version` marker — both entry points import `VERSION` from it), `manifest.json`, `server.json`, and `.claude-plugin/*`; every one is registered in `release-please-config.json` `extra-files` and `versionSyncTest` guards them. `.release-please-manifest.json` is seeded at `0.0.0`, so the first `feat:` PR ships `v0.1.0`. Conventional-commit PR titles drive the bump (`feat:` minor, `fix:` patch). The release-please workflow's `mcp-publish` step derives the package + skill name from the repo (single `skills/*/SKILL.md` → auto-discovered; no `skill-path` pin needed).
+Versioning is **release-please** — do NOT hand-bump. The version lives in `package.json`, `src/version.ts` (`// x-release-please-version` marker — both entry points import `VERSION` from it), `manifest.json`, `server.json`, and `.claude-plugin/*`; every one is registered in `release-please-config.json` `extra-files` and `versionSyncTest` guards them. `.release-please-manifest.json` is seeded at `0.0.0`, so the first `feat:` PR ships `v0.1.0`. The release-please workflow's `mcp-publish` step derives the package + skill name from the repo (single `skills/*/SKILL.md` → auto-discovered; no `skill-path` pin needed).
 
-## PRs & merging
+<!-- pr-workflow:v3 -->
+## Pull requests & release notes
 
-Branch + PR; `pr-auto-review` + `auto-merge` ship it on a `pass`/`warn` verdict + green CI. Don't add `ready-to-merge` or merge manually. Squash-only.
+Fleet policy — Conventional-Commit PR titles, labels, the auto-review /
+auto-merge ladder, auto-review follow-up issues, PR timing, and release PRs —
+lives in `~/.claude/CLAUDE.md`. Don't restate it here; the copies drifted.
 
-Fleet policy lives in `~/.claude/CLAUDE.md`; shared technical conventions in
-[`chrischall/workflows`](https://github.com/chrischall/workflows) →
-`docs/fleet-conventions.md`.
+Shared technical conventions (publishing, bundling, versioning guards,
+write-verification, transport archetypes, testing traps) live in
+[`chrischall/workflows`](https://github.com/chrischall/workflows):
+`docs/fleet-conventions.md`, plus `README.md` for the CI pipeline contract.
 
 ## Gotchas
 
