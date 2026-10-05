@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.5](https://github.com/chrischall/sixflags-mcp/compare/v2.1.4...v2.1.5) (2026-10-05)
+
+
+### Bug Fixes
+
+* **deps:** bump dotenv ([#109](https://github.com/chrischall/sixflags-mcp/issues/109)) ([0ba0c3f](https://github.com/chrischall/sixflags-mcp/commit/0ba0c3ff0722aea505d39086ed5fce56f610ae8b))
+* **deps:** require @chrischall/mcp-utils 2.14.0 and MCP SDK 2.3.0 ([#111](https://github.com/chrischall/sixflags-mcp/issues/111)) ([2c688f7](https://github.com/chrischall/sixflags-mcp/commit/2c688f7cac49592238480683a815b5573972797b))
+
 ## [2.1.4](https://github.com/chrischall/sixflags-mcp/compare/v2.1.3...v2.1.4) (2026-10-03)
 
 
