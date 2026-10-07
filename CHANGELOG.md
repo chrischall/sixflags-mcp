@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.6](https://github.com/chrischall/sixflags-mcp/compare/v2.1.5...v2.1.6) (2026-10-07)
+
+
+### Bug Fixes
+
+* **deps:** pick up @chrischall/mcp-utils 2.15.0 server fixes ([#112](https://github.com/chrischall/sixflags-mcp/issues/112)) ([6c00e00](https://github.com/chrischall/sixflags-mcp/commit/6c00e00b115f4da3f778f13effd69c48b46b6b4a))
+
 ## [2.1.5](https://github.com/chrischall/sixflags-mcp/compare/v2.1.4...v2.1.5) (2026-10-05)
 
 
