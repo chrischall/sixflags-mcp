@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, copyFileSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -70,5 +70,15 @@ describe('server boot', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  }, 30_000);
+
+  it('manifest.json declares exactly the tools the server registers', async () => {
+    // Claude Desktop shows the manifest's tool list, not tools/list — a tool
+    // missing here is invisible in the extension listing.
+    const manifest = JSON.parse(readFileSync(join(repoRoot, 'manifest.json'), 'utf8')) as {
+      tools: { name: string }[];
+    };
+    const registered = await handshake(join(repoRoot, 'dist', 'index.js'), repoRoot);
+    expect(manifest.tools.map((t) => t.name).sort()).toEqual([...registered].sort());
   }, 30_000);
 });

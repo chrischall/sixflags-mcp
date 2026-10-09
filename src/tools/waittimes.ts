@@ -48,7 +48,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .describe('Only return currently-operating rides (default false: include closed/down)')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ park, openOnly }: { park?: string; openOnly?: boolean }) => {
       const resolved = await directory.resolve(park);
@@ -93,7 +93,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .describe('How many suggestions to return (default 5)')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({
       park,

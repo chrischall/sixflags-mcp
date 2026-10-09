@@ -115,15 +115,30 @@ describe('sixflags_get_park_schedule', () => {
     await h.close();
   });
 
-  it('falls back to UTC when the timezone is invalid', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-07-18T14:00:00Z'));
-    const h = await harnessFor({ schedule: { ...scheduleFixture, timezone: 'Not/AZone' } });
-    const data = parseToolResult<{ timezone: string; today: { date: string } }>(
-      await h.callTool('sixflags_get_park_schedule', {}),
-    );
-    expect(data.timezone).toBe('Not/AZone');
-    expect(data.today.date).toBe('2026-07-18'); // UTC fallback still lands on the 18th
-    await h.close();
-  });
+  // 01:00Z on the 19th is 21:00 on the 18th in every US park: a UTC "today"
+  // would already be tomorrow and drop the 18th's hours.
+  for (const [label, timezone] of [
+    ['missing', undefined],
+    ['invalid', 'Not/AZone'],
+  ] as const) {
+    it(`does not drop the park's current day when the timezone is ${label}`, async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-07-19T01:00:00Z'));
+      const { timezone: _tz, ...rest } = scheduleFixture;
+      const h = await harnessFor({ schedule: timezone === undefined ? rest : { ...rest, timezone } });
+      const data = parseToolResult<{
+        timezone: string | null;
+        today: { date: string | null; note?: string };
+        schedule: { date: string }[];
+      }>(await h.callTool('sixflags_get_park_schedule', { days: 2 }));
+      expect(data.timezone).toBe(timezone ?? null);
+      expect(data.schedule.map((s) => s.date)).toContain('2026-07-18');
+      expect(data.schedule.map((s) => s.date)).toContain('2026-07-19');
+      expect(data.today.date).toBeNull();
+      expect(data.today.note).toMatch(/timezone/i);
+      expect(data.today.note).toContain('2026-07-18');
+      expect(data.today.note).toContain('2026-07-19');
+      await h.close();
+    });
+  }
 });

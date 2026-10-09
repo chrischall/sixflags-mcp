@@ -1,4 +1,4 @@
-import { McpToolError } from '@chrischall/mcp-utils';
+import { currentCallSignal, McpToolError } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { SixFlagsClient } from './client.js';
 import { getHomePark } from './config.js';
@@ -80,6 +80,12 @@ export interface ParkDirectoryOptions {
 
 export class ParkDirectory {
   private cache: { parks: Park[]; fetchedAt: number } | undefined;
+  // The fetch currently in progress, shared by every caller that arrives while
+  // the cache is cold or expired — hosts fire tool calls in parallel, and each
+  // would otherwise download the whole themeparks.wiki catalog on its own.
+  // `signal` is the cancellation of the tool call that started it: the request
+  // runs under that call's ambient signal, so if it cancels, the others retry.
+  private inFlight: { promise: Promise<Park[]>; signal: AbortSignal | undefined } | undefined;
   private readonly now: () => number;
   private readonly homePark: string | undefined;
 
@@ -104,6 +110,25 @@ export class ParkDirectory {
     const cached = this.cache;
     if (cached && this.now() - cached.fetchedAt < CACHE_TTL_MS) return cached.parks;
 
+    if (!this.inFlight) {
+      // Cleared once settled (success or failure), so a rejection is never
+      // shared with callers that arrive after it.
+      const promise = this.fetchParks().finally(() => {
+        this.inFlight = undefined;
+      });
+      this.inFlight = { promise, signal: currentCallSignal() };
+    }
+    const shared = this.inFlight;
+    try {
+      return await shared.promise;
+    } catch (err) {
+      // Another caller's cancellation is not this caller's failure.
+      if (shared.signal?.aborted && shared.signal !== currentCallSignal()) return this.list();
+      throw err;
+    }
+  }
+
+  private async fetchParks(): Promise<Park[]> {
     const raw = await this.client.request<unknown>('GET', '/v1/destinations');
     const data = parseResponse(destinationsSchema, raw, 'destinations response');
 
@@ -155,6 +180,9 @@ export class ParkDirectory {
       (p) => p.name.toLowerCase() === q || p.slug?.toLowerCase() === q,
     );
     if (exact.length === 1) return exact[0]!;
+    // Several parks share a name exactly (e.g. "Hurricane Harbor" in different
+    // destinations): offer just those, not every substring hit.
+    if (exact.length > 1) throw ambiguous(query, exact);
 
     // 3. Unique substring of name or destination.
     const partial = parks.filter(
@@ -162,15 +190,26 @@ export class ParkDirectory {
     );
     if (partial.length === 1) return partial[0]!;
 
-    if (partial.length > 1) {
-      const names = partial.map((p) => p.name).join(', ');
-      throw new McpToolError(`"${query}" matches multiple Six Flags parks: ${names}.`, {
-        hint: 'Pass a more specific park name or its id. Use sixflags_list_parks to see the options.',
-      });
-    }
+    if (partial.length > 1) throw ambiguous(query, partial);
 
     throw new McpToolError(`No Six Flags park matches "${query}".`, {
       hint: 'Use sixflags_list_parks to see the available parks and their ids.',
     });
   }
+}
+
+// How many candidates an ambiguity error spells out before summarising the rest.
+const MAX_AMBIGUOUS_CANDIDATES = 10;
+
+// Names alone do not tell the candidates apart (several water parks are all
+// "Hurricane Harbor"), so each carries its destination and park id.
+function ambiguous(query: string, matches: Park[]): McpToolError {
+  const shown = matches
+    .slice(0, MAX_AMBIGUOUS_CANDIDATES)
+    .map((p) => `${p.name} (${p.destination}, id ${p.parkId})`);
+  const rest = matches.length - shown.length;
+  const list = rest > 0 ? `${shown.join('; ')}; and ${rest} more` : shown.join('; ');
+  return new McpToolError(`"${query}" matches multiple Six Flags parks: ${list}.`, {
+    hint: 'Pass the park id of the one you mean, or a more specific name. Use sixflags_list_parks to see the options.',
+  });
 }

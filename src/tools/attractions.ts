@@ -31,7 +31,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
           .describe('Which kind of entity to list (default ATTRACTION)')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ park, type }: { park?: string; type?: 'ATTRACTION' | 'SHOW' | 'RESTAURANT' }) => {
       const resolved = await directory.resolve(park);
@@ -74,7 +74,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
           .describe('Park name, slug, or id. Defaults to your home park (Carowinds).')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ park }: { park?: string }) => {
       const resolved = await directory.resolve(park);

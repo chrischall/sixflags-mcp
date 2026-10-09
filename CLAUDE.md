@@ -58,7 +58,7 @@ There is **no `view: compact | full` parameter here, and that is a decision, not
 
 ## Park resolution
 
-`ParkDirectory.resolve(ref?)` priority: exact park id → exact name/slug → unique name/destination substring → error (ambiguous lists the matches; unknown points at `sixflags_list_parks`). `undefined` resolves `directory.configuredHomePark`, itself run through the same matcher. The directory memoizes `/v1/destinations` for 12h (injectable clock for tests).
+`ParkDirectory.resolve(ref?)` priority: exact park id → exact name/slug → unique name/destination substring → error (ambiguous lists the matches — only the exact-name ones when several share a name — each with its destination and park id, capped at 10; unknown points at `sixflags_list_parks`). `undefined` resolves `directory.configuredHomePark`, itself run through the same matcher. The directory memoizes `/v1/destinations` for 12h (injectable clock for tests).
 
 `configuredHomePark` is the multi-tenancy seam: `new ParkDirectory(client, { homePark })` overrides the default per instance, and it falls back to the process-global `getHomePark()` (`SIXFLAGS_HOME_PARK` → `Carowinds`) when the option is absent or blank. The stdio entry passes nothing, so it stays purely env-driven; a hosted per-user deployment passes each session's own value. Tools that report the default (`sixflags_list_parks`'s `configuredAs`) must read `directory.configuredHomePark`, **never `getHomePark()` directly** — the latter would leak the operator's default to every hosted user.
 

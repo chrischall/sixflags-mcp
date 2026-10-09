@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { currentCallSignal, withCallSignal } from '@chrischall/mcp-utils';
 import { ParkDirectory } from '../src/parks.js';
 import { SixFlagsClient } from '../src/client.js';
-import { makeDirectory } from './_fixtures.js';
+import { destinationsFixture, makeDirectory } from './_fixtures.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -29,6 +30,43 @@ describe('ParkDirectory.list', () => {
 
     clock += 13 * 60 * 60 * 1000; // past the 12h TTL
     await directory.list();
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares one in-flight destinations fetch across concurrent cold callers', async () => {
+    const { directory, spy } = makeDirectory();
+    const [a, b, c] = await Promise.all([directory.list(), directory.list(), directory.resolve('Carowinds')]);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(a).toBe(b);
+    expect(c.name).toBe('Carowinds');
+  });
+
+  it('clears a failed in-flight fetch so the next call retries', async () => {
+    const { directory, spy } = makeDirectory();
+    spy.mockRejectedValueOnce(new Error('upstream down'));
+    await expect(Promise.all([directory.list(), directory.list()])).rejects.toThrow('upstream down');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect((await directory.list()).length).toBe(5);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not fail a concurrent caller because the caller that started the shared fetch cancelled", async () => {
+    const { directory, spy } = makeDirectory();
+    // Behave like the real client: the request runs under the ambient
+    // cancellation of whichever tool call issued it.
+    spy.mockImplementation(async () => {
+      const signal = currentCallSignal();
+      await new Promise((r) => setTimeout(r, 0));
+      if (signal?.aborted) throw signal.reason;
+      return destinationsFixture as never;
+    });
+    const first = new AbortController();
+    const second = new AbortController();
+    const a = withCallSignal(first.signal, () => directory.list());
+    const b = withCallSignal(second.signal, () => directory.list());
+    first.abort(new Error('caller A cancelled'));
+    await expect(a).rejects.toThrow('caller A cancelled');
+    expect((await b).length).toBe(5);
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
@@ -192,6 +230,36 @@ describe('ParkDirectory.resolve', () => {
   it('throws on an ambiguous substring', async () => {
     const { directory } = makeDirectory();
     await expect(directory.resolve('cedar')).rejects.toThrow(/multiple/i);
+  });
+
+  it('names each ambiguous candidate with its destination and id', async () => {
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          { name: 'Six Flags St. Louis X', slug: 'sixflags_destination_A', parks: [{ id: 'p-hh-a', name: 'Hurricane Harbor' }] },
+          { name: 'Six Flags Over Texas', slug: 'sixflags_destination_B', parks: [{ id: 'p-hh-b', name: 'Hurricane Harbor' }] },
+          { name: 'Six Flags Magic Mountain', slug: 'sixflags_destination_C', parks: [{ id: 'p-hh-la', name: 'Hurricane Harbor Los Angeles' }] },
+        ],
+      },
+    });
+    const err = await directory.resolve('Hurricane Harbor').catch((e: Error) => e);
+    expect(err).toBeInstanceOf(Error);
+    const message = (err as Error).message;
+    // Two exact name matches: only those are offered, each distinguishable.
+    expect(message).toContain('Hurricane Harbor (Six Flags St. Louis X, id p-hh-a)');
+    expect(message).toContain('Hurricane Harbor (Six Flags Over Texas, id p-hh-b)');
+    expect(message).not.toContain('p-hh-la');
+  });
+
+  it('caps a long ambiguous candidate list', async () => {
+    const parks = Array.from({ length: 15 }, (_, i) => ({ id: `p-${i}`, name: `Fun Park ${String(i).padStart(2, '0')}` }));
+    const { directory } = makeDirectory({
+      destinations: { destinations: [{ name: 'Big Destination', slug: 'sixflags_destination_BIG', parks }] },
+    });
+    const message = await directory.resolve('fun park').catch((e: Error) => e.message);
+    expect(message).toContain('id p-9)');
+    expect(message).not.toContain('id p-10)');
+    expect(message).toContain('and 5 more');
   });
 
   it('throws when nothing matches', async () => {

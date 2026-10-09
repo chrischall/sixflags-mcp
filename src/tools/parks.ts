@@ -18,26 +18,28 @@ const scheduleResponseSchema = z.looseObject({
   schedule: lenientArray(scheduleEntrySchema, 'schedule'),
 });
 
-// Today's date (YYYY-MM-DD) in the park's own timezone — so "today's hours"
-// stays correct even when the server runs in another zone. en-CA formats as
-// ISO (YYYY-MM-DD).
-function parkToday(timezone: string | null | undefined): string {
+// The park's IANA zone, or null when upstream omitted it or sent one this
+// runtime does not recognise.
+function validZone(timezone: string | null | undefined): string | null {
+  if (!timezone) return null;
   try {
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: timezone ?? 'UTC',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date());
+    new Intl.DateTimeFormat('en-CA', { timeZone: timezone });
+    return timezone;
   } catch {
-    /* v8 ignore next -- only an invalid IANA zone reaches here */
-    return new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'UTC',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(new Date());
+    return null;
   }
+}
+
+// Today's date (YYYY-MM-DD) in the given zone — so "today's hours" stays
+// correct even when the server runs in another zone. en-CA formats as ISO
+// (YYYY-MM-DD).
+function todayIn(timeZone: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
 }
 
 // Add `n` days to a YYYY-MM-DD string via UTC date math (no timezone drift for
@@ -59,7 +61,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .describe('Case-insensitive substring to filter park or destination names')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ search }: { search?: string }) => {
       const all = await directory.list();
@@ -113,7 +115,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .describe('How many days ahead to include (default 10)')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ park, days }: { park?: string; days?: number }) => {
       const resolved = await directory.resolve(park);
@@ -124,10 +126,16 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
       const data = parseResponse(scheduleResponseSchema, raw, 'schedule response');
 
       const tz = data.timezone ?? null;
-      const today = parkToday(tz);
+      const zone = validZone(tz);
+      // Without the park's zone, today is computed in UTC — which every Six
+      // Flags park (all UTC-4..-8) reaches a day early, from the local
+      // evening. Start the window a day earlier so the park's current day is
+      // never dropped, and say that "today" could not be pinned down.
+      const today = todayIn(zone ?? 'UTC');
+      const from = zone ? today : addDays(today, -1);
       const horizon = addDays(today, days ?? 10);
       const entries = data.schedule
-        .filter((e) => e.date >= today && e.date <= horizon)
+        .filter((e) => e.date >= from && e.date <= horizon)
         .sort((a, b) => a.date.localeCompare(b.date));
 
       const todayOperating = entries.find((e) => e.date === today && (e.type ?? '') === 'OPERATING');
@@ -135,9 +143,14 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
       return jsonResponse({
         park: { name: resolved.name, parkId: resolved.parkId },
         timezone: tz,
-        today: todayOperating
-          ? { date: today, opening: todayOperating.openingTime, closing: todayOperating.closingTime }
-          : { date: today, note: 'No operating hours listed for today (the park may be closed).' },
+        today: !zone
+          ? {
+              date: null,
+              note: `The park's timezone is unavailable, so its local "today" is either ${from} or ${today}; the schedule covers both.`,
+            }
+          : todayOperating
+            ? { date: today, opening: todayOperating.openingTime, closing: todayOperating.closingTime }
+            : { date: today, note: 'No operating hours listed for today (the park may be closed).' },
         schedule: entries.map((e) => ({
           date: e.date,
           type: e.type ?? null,

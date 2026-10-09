@@ -9,7 +9,7 @@ export function registerHealthTools(server: McpServer, directory: ParkDirectory)
     {
       description:
         'Check that the upstream data source (themeparks.wiki) is reachable and returning Six Flags park data. Returns ok/degraded plus the number of parks discovered.',
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async () => {
       try {
