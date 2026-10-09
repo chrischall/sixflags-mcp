@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.1.7](https://github.com/chrischall/sixflags-mcp/compare/v2.1.6...v2.1.7) (2026-10-09)
+
+
+### Bug Fixes
+
+* annotate tools truthfully and sync manifests with the served tools ([#122](https://github.com/chrischall/sixflags-mcp/issues/122)) ([b4564ab](https://github.com/chrischall/sixflags-mcp/commit/b4564abe8e7f62ed6dd468e178f0854ef7d62925))
+* declare the plugin MCP config under the mcpServers key Claude Code reads ([#125](https://github.com/chrischall/sixflags-mcp/issues/125)) ([b7a5ba7](https://github.com/chrischall/sixflags-mcp/commit/b7a5ba75b2fd40c224ff61bf9304f2b9244cebaa))
+* **deps:** bump source-map-js ([#121](https://github.com/chrischall/sixflags-mcp/issues/121)) ([0ed409f](https://github.com/chrischall/sixflags-mcp/commit/0ed409f583dcb4b32bc0d3032b9d0812d8604502))
+* **deps:** update @chrischall/mcp-utils to 3.0.0 ([#119](https://github.com/chrischall/sixflags-mcp/issues/119)) ([7a37f13](https://github.com/chrischall/sixflags-mcp/commit/7a37f132a5369546181136e0b2a4782e5f4a068e))
+* **parks:** keep schedule today.date a date string when the park timezone is unknown ([#117](https://github.com/chrischall/sixflags-mcp/issues/117)) ([6ea2778](https://github.com/chrischall/sixflags-mcp/commit/6ea27787103c0c327eb9eeabaa1ee8b7f0327f82)), closes [#115](https://github.com/chrischall/sixflags-mcp/issues/115)
+* resolve low-severity audit findings ([#114](https://github.com/chrischall/sixflags-mcp/issues/114)) ([942a6de](https://github.com/chrischall/sixflags-mcp/commit/942a6de9900ac20d9520772cdf3a4725bc074cb1))
+
+
+### Documentation
+
+* state the SIXFLAGS_USER_AGENT default in server.json ([#124](https://github.com/chrischall/sixflags-mcp/issues/124)) ([fe302cd](https://github.com/chrischall/sixflags-mcp/commit/fe302cd3485c4c296803d9e7b99bb81e6ea4cbb8))
+
 ## [2.1.6](https://github.com/chrischall/sixflags-mcp/compare/v2.1.5...v2.1.6) (2026-10-07)
 
 
