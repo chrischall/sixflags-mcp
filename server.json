@@ -21,6 +21,18 @@
           "description": "Default park for tools that don't name one. A park name, themeparks.wiki slug, or park id. Defaults to Carowinds.",
           "isRequired": false,
           "format": "string"
+        },
+        {
+          "name": "SIXFLAGS_REQUEST_TIMEOUT_MS",
+          "description": "Per-request timeout in ms. Defaults to 15000.",
+          "isRequired": false,
+          "format": "number"
+        },
+        {
+          "name": "SIXFLAGS_USER_AGENT",
+          "description": "User-Agent sent to themeparks.wiki.",
+          "isRequired": false,
+          "format": "string"
         }
       ]
     }

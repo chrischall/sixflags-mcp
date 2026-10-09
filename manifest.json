@@ -34,7 +34,9 @@
         "${__dirname}/dist/bundle.js"
       ],
       "env": {
-        "SIXFLAGS_HOME_PARK": "${user_config.sixflags_home_park}"
+        "SIXFLAGS_HOME_PARK": "${user_config.sixflags_home_park}",
+        "SIXFLAGS_REQUEST_TIMEOUT_MS": "${user_config.sixflags_request_timeout_ms}",
+        "SIXFLAGS_USER_AGENT": "${user_config.sixflags_user_agent}"
       }
     }
   },
@@ -45,6 +47,18 @@
       "description": "The park every tool defaults to when you don't name one. May be a park name (e.g. \"Carowinds\"), a themeparks.wiki slug, or a park id. Defaults to Carowinds.",
       "required": false,
       "default": "Carowinds"
+    },
+    "sixflags_request_timeout_ms": {
+      "type": "string",
+      "title": "Request timeout (ms)",
+      "description": "Per-request timeout. Defaults to 15000.",
+      "required": false
+    },
+    "sixflags_user_agent": {
+      "type": "string",
+      "title": "User-Agent",
+      "description": "User-Agent sent to themeparks.wiki. Defaults to sixflags-mcp (+https://github.com/chrischall/sixflags-mcp).",
+      "required": false
     }
   },
   "tools": [
