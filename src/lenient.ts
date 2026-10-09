@@ -13,6 +13,23 @@ import { z } from 'zod';
 
 const LABEL = 'sixflags-mcp';
 
+// Drift warnings are logged once per distinct problem per process. A field
+// that changes type chain-wide is wrong in every one of a park's ~150 live
+// records on every call; logging each one buries stderr (and, hosted, the log
+// volume) without telling anyone anything the first line did not.
+const seenWarnings = new Set<string>();
+
+function warnOnce(key: string, message: string): void {
+  if (seenWarnings.has(key)) return;
+  seenWarnings.add(key);
+  console.error(`[${LABEL}] WARNING: ${message} (further identical warnings are suppressed)`);
+}
+
+/** Forget which drift warnings were already logged. For tests. */
+export function resetDriftWarnings(): void {
+  seenWarnings.clear();
+}
+
 function describeIssues(error: { issues: readonly z.core.$ZodIssue[] }): string {
   return error.issues
     .map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
@@ -21,14 +38,13 @@ function describeIssues(error: { issues: readonly z.core.$ZodIssue[] }): string 
 
 /**
  * An optional field: absent, null, or malformed all read as null. A malformed
- * value is logged (as {@link lenientArray} logs a dropped element) so upstream
- * drift is visible rather than silently erased.
+ * value is logged once (as {@link lenientArray} logs a dropped element) so
+ * upstream drift is visible rather than silently erased.
  */
 export function opt<T extends z.ZodType>(schema: T) {
   return schema.nullish().catch(({ error }) => {
-    console.error(
-      `[${LABEL}] WARNING: nulling malformed optional field. ${describeIssues(error)}`,
-    );
+    const issues = describeIssues(error);
+    warnOnce(`opt|${issues}`, `nulling malformed optional field. ${issues}`);
     return null;
   });
 }
@@ -45,17 +61,18 @@ export function lenientArray<T extends z.ZodType>(item: T, context: string) {
     .transform((value): z.output<T>[] => {
     if (value == null) return [];
     if (!Array.isArray(value)) {
-      console.error(`[${LABEL}] WARNING: expected ${context} to be an array; ignoring it.`);
+      warnOnce(`not-array|${context}`, `expected ${context} to be an array; ignoring it.`);
       return [];
     }
     const kept: z.output<T>[] = [];
     value.forEach((element, i) => {
       const result = item.safeParse(element);
       if (result.success) kept.push(result.data);
-      else
-        console.error(
-          `[${LABEL}] WARNING: dropping malformed ${context}[${i}]. ${describeIssues(result.error)}`,
-        );
+      else {
+        // Keyed without the index: the same drift hits every element alike.
+        const issues = describeIssues(result.error);
+        warnOnce(`drop|${context}|${issues}`, `dropping malformed ${context}[${i}]. ${issues}`);
+      }
     });
     return kept;
     })
@@ -71,7 +88,7 @@ export function lenientArray<T extends z.ZodType>(item: T, context: string) {
 export function parseResponse<T>(schema: z.ZodType<T>, raw: unknown, context: string): T {
   let root = raw;
   if (root === null || typeof root !== 'object' || Array.isArray(root)) {
-    console.error(`[${LABEL}] WARNING: ${context} was not a JSON object; treating it as empty.`);
+    warnOnce(`not-object|${context}`, `${context} was not a JSON object; treating it as empty.`);
     root = {};
   }
   return parseLenient(schema, root, { label: LABEL, context });
