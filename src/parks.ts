@@ -180,6 +180,9 @@ export class ParkDirectory {
       (p) => p.name.toLowerCase() === q || p.slug?.toLowerCase() === q,
     );
     if (exact.length === 1) return exact[0]!;
+    // Several parks share a name exactly (e.g. "Hurricane Harbor" in different
+    // destinations): offer just those, not every substring hit.
+    if (exact.length > 1) throw ambiguous(query, exact);
 
     // 3. Unique substring of name or destination.
     const partial = parks.filter(
@@ -187,15 +190,26 @@ export class ParkDirectory {
     );
     if (partial.length === 1) return partial[0]!;
 
-    if (partial.length > 1) {
-      const names = partial.map((p) => p.name).join(', ');
-      throw new McpToolError(`"${query}" matches multiple Six Flags parks: ${names}.`, {
-        hint: 'Pass a more specific park name or its id. Use sixflags_list_parks to see the options.',
-      });
-    }
+    if (partial.length > 1) throw ambiguous(query, partial);
 
     throw new McpToolError(`No Six Flags park matches "${query}".`, {
       hint: 'Use sixflags_list_parks to see the available parks and their ids.',
     });
   }
+}
+
+// How many candidates an ambiguity error spells out before summarising the rest.
+const MAX_AMBIGUOUS_CANDIDATES = 10;
+
+// Names alone do not tell the candidates apart (several water parks are all
+// "Hurricane Harbor"), so each carries its destination and park id.
+function ambiguous(query: string, matches: Park[]): McpToolError {
+  const shown = matches
+    .slice(0, MAX_AMBIGUOUS_CANDIDATES)
+    .map((p) => `${p.name} (${p.destination}, id ${p.parkId})`);
+  const rest = matches.length - shown.length;
+  const list = rest > 0 ? `${shown.join('; ')}; and ${rest} more` : shown.join('; ');
+  return new McpToolError(`"${query}" matches multiple Six Flags parks: ${list}.`, {
+    hint: 'Pass the park id of the one you mean, or a more specific name. Use sixflags_list_parks to see the options.',
+  });
 }

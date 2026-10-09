@@ -232,6 +232,36 @@ describe('ParkDirectory.resolve', () => {
     await expect(directory.resolve('cedar')).rejects.toThrow(/multiple/i);
   });
 
+  it('names each ambiguous candidate with its destination and id', async () => {
+    const { directory } = makeDirectory({
+      destinations: {
+        destinations: [
+          { name: 'Six Flags St. Louis X', slug: 'sixflags_destination_A', parks: [{ id: 'p-hh-a', name: 'Hurricane Harbor' }] },
+          { name: 'Six Flags Over Texas', slug: 'sixflags_destination_B', parks: [{ id: 'p-hh-b', name: 'Hurricane Harbor' }] },
+          { name: 'Six Flags Magic Mountain', slug: 'sixflags_destination_C', parks: [{ id: 'p-hh-la', name: 'Hurricane Harbor Los Angeles' }] },
+        ],
+      },
+    });
+    const err = await directory.resolve('Hurricane Harbor').catch((e: Error) => e);
+    expect(err).toBeInstanceOf(Error);
+    const message = (err as Error).message;
+    // Two exact name matches: only those are offered, each distinguishable.
+    expect(message).toContain('Hurricane Harbor (Six Flags St. Louis X, id p-hh-a)');
+    expect(message).toContain('Hurricane Harbor (Six Flags Over Texas, id p-hh-b)');
+    expect(message).not.toContain('p-hh-la');
+  });
+
+  it('caps a long ambiguous candidate list', async () => {
+    const parks = Array.from({ length: 15 }, (_, i) => ({ id: `p-${i}`, name: `Fun Park ${String(i).padStart(2, '0')}` }));
+    const { directory } = makeDirectory({
+      destinations: { destinations: [{ name: 'Big Destination', slug: 'sixflags_destination_BIG', parks }] },
+    });
+    const message = await directory.resolve('fun park').catch((e: Error) => e.message);
+    expect(message).toContain('id p-9)');
+    expect(message).not.toContain('id p-10)');
+    expect(message).toContain('and 5 more');
+  });
+
   it('throws when nothing matches', async () => {
     const { directory } = makeDirectory();
     await expect(directory.resolve('zzz-nope')).rejects.toThrow(/No Six Flags park/i);
