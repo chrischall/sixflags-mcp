@@ -59,7 +59,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .describe('Case-insensitive substring to filter park or destination names')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ search }: { search?: string }) => {
       const all = await directory.list();
@@ -113,7 +113,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .describe('How many days ahead to include (default 10)')
           .optional(),
       }),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     },
     async ({ park, days }: { park?: string; days?: number }) => {
       const resolved = await directory.resolve(park);
