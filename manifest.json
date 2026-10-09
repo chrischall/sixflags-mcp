@@ -71,6 +71,10 @@
     {
       "name": "sixflags_get_shows",
       "description": "Today's live show schedule for a park"
+    },
+    {
+      "name": "sixflags_healthcheck",
+      "description": "Check that the themeparks.wiki upstream is reachable"
     }
   ],
   "compatibility": {
