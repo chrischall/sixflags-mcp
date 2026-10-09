@@ -30,7 +30,7 @@
         },
         {
           "name": "SIXFLAGS_USER_AGENT",
-          "description": "User-Agent sent to themeparks.wiki.",
+          "description": "User-Agent sent to themeparks.wiki. Defaults to sixflags-mcp (+https://github.com/chrischall/sixflags-mcp).",
           "isRequired": false,
           "format": "string"
         }

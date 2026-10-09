@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDefaultHeaders, getRequestTimeoutMs } from '../src/protocol.js';
 
@@ -18,6 +19,23 @@ describe('getDefaultHeaders', () => {
   it('falls back to the default when SIXFLAGS_USER_AGENT is blank', () => {
     vi.stubEnv('SIXFLAGS_USER_AGENT', '   ');
     expect(getDefaultHeaders()['User-Agent']).toContain('sixflags-mcp');
+  });
+
+  it('server.json and manifest.json state the real default User-Agent', () => {
+    const defaultUa = getDefaultHeaders()['User-Agent'];
+    const serverJson = JSON.parse(
+      readFileSync(new URL('../server.json', import.meta.url), 'utf8'),
+    ) as { packages: { environmentVariables: { name: string; description: string }[] }[] };
+    const envVar = serverJson.packages
+      .flatMap((p) => p.environmentVariables)
+      .find((v) => v.name === 'SIXFLAGS_USER_AGENT');
+    expect(envVar?.description).toContain(`Defaults to ${defaultUa}`);
+    const manifest = JSON.parse(
+      readFileSync(new URL('../manifest.json', import.meta.url), 'utf8'),
+    ) as { user_config: Record<string, { description: string }> };
+    expect(manifest.user_config.sixflags_user_agent.description).toContain(
+      `Defaults to ${defaultUa}`,
+    );
   });
 });
 

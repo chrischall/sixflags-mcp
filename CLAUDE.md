@@ -67,7 +67,7 @@ There is **no `view: compact | full` parameter here, and that is a decision, not
 ```
 SIXFLAGS_HOME_PARK            Optional. Default park for tools that don't name one — a name, slug, or park id. Default "Carowinds".
 SIXFLAGS_REQUEST_TIMEOUT_MS   Optional. Per-request timeout in ms. Default 15000.
-SIXFLAGS_USER_AGENT           Optional. User-Agent sent to themeparks.wiki.
+SIXFLAGS_USER_AGENT           Optional. User-Agent sent to themeparks.wiki. Default "sixflags-mcp (+https://github.com/chrischall/sixflags-mcp)".
 ```
 
 `.env` (project root) is loaded by `client.ts` via `loadDotenvSafely` (silently skipped in the mcpb bundle). There are no secrets — the upstream is keyless.

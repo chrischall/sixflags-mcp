@@ -46,7 +46,7 @@ All optional — the upstream is keyless.
 | --- | --- | --- |
 | `SIXFLAGS_HOME_PARK` | `Carowinds` | Default park for tools that don't name one. A park name, themeparks.wiki slug, or park id. |
 | `SIXFLAGS_REQUEST_TIMEOUT_MS` | `15000` | Per-request timeout. |
-| `SIXFLAGS_USER_AGENT` | `sixflags-mcp (+…)` | User-Agent sent to themeparks.wiki. |
+| `SIXFLAGS_USER_AGENT` | `sixflags-mcp (+https://github.com/chrischall/sixflags-mcp)` | User-Agent sent to themeparks.wiki. |
 
 ## Development
 
