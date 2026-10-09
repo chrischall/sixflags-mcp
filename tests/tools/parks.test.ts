@@ -128,16 +128,19 @@ describe('sixflags_get_park_schedule', () => {
       const h = await harnessFor({ schedule: timezone === undefined ? rest : { ...rest, timezone } });
       const data = parseToolResult<{
         timezone: string | null;
-        today: { date: string | null; note?: string };
+        today: { date: string; note?: string; opening?: string };
         schedule: { date: string }[];
       }>(await h.callTool('sixflags_get_park_schedule', { days: 2 }));
       expect(data.timezone).toBe(timezone ?? null);
       expect(data.schedule.map((s) => s.date)).toContain('2026-07-18');
       expect(data.schedule.map((s) => s.date)).toContain('2026-07-19');
-      expect(data.today.date).toBeNull();
+      // today.date stays a YYYY-MM-DD string (the UTC date, as before the
+      // window widened) so the output shape never changes; the note flags
+      // that it may be a day ahead of the park.
+      expect(data.today.date).toBe('2026-07-19');
+      expect(data.today.opening).toBeUndefined();
       expect(data.today.note).toMatch(/timezone/i);
       expect(data.today.note).toContain('2026-07-18');
-      expect(data.today.note).toContain('2026-07-19');
       await h.close();
     });
   }

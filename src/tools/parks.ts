@@ -131,6 +131,8 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
       // Flags park (all UTC-4..-8) reaches a day early, from the local
       // evening. Start the window a day earlier so the park's current day is
       // never dropped, and say that "today" could not be pinned down.
+      // `today.date` stays the UTC date string (its pre-existing value) so
+      // the output shape is the same with or without a zone.
       const today = todayIn(zone ?? 'UTC');
       const from = zone ? today : addDays(today, -1);
       const horizon = addDays(today, days ?? 10);
@@ -145,8 +147,8 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
         timezone: tz,
         today: !zone
           ? {
-              date: null,
-              note: `The park's timezone is unavailable, so its local "today" is either ${from} or ${today}; the schedule covers both.`,
+              date: today,
+              note: `The park's timezone is unavailable, so this date is in UTC and the park's local "today" may be ${from} instead; the schedule covers both.`,
             }
           : todayOperating
             ? { date: today, opening: todayOperating.openingTime, closing: todayOperating.closingTime }
