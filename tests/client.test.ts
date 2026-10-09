@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { withCallSignal } from '@chrischall/mcp-utils';
+import { McpToolError, UpstreamFormatError, withCallSignal } from '@chrischall/mcp-utils';
 import { SixFlagsClient } from '../src/client.js';
 
 describe('SixFlagsClient', () => {
@@ -45,6 +45,9 @@ describe('SixFlagsClient', () => {
     const client = new SixFlagsClient({ fetchImpl: fetchImpl as unknown as typeof fetch });
     const err = await client.request('GET', '/v1/destinations').catch((e: unknown) => e);
     expect(err).not.toBeInstanceOf(SyntaxError);
+    // mcp-utils 3.0's fetchJson classifies a non-JSON 2xx itself.
+    expect(err).toBeInstanceOf(UpstreamFormatError);
+    expect(err).toBeInstanceOf(McpToolError);
     expect(String((err as Error).message)).toMatch(/themeparks\.wiki/);
     expect(String((err as Error).message)).toContain('/v1/destinations');
   });

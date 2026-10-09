@@ -1,4 +1,4 @@
-import { createApiClient, loadDotenvSafely, McpToolError, type ApiClient } from '@chrischall/mcp-utils';
+import { createApiClient, loadDotenvSafely, type ApiClient } from '@chrischall/mcp-utils';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { BASE_URL, getDefaultHeaders, getRequestTimeoutMs } from './protocol.js';
@@ -34,25 +34,16 @@ export class SixFlagsClient {
   }
 
   /**
-   * GET a JSON resource. Throws a redacted, truncated error on non-2xx.
+   * GET a JSON resource. Throws a redacted, truncated error on non-2xx, and
+   * mcp-utils' `UpstreamFormatError` (an McpToolError naming the service and
+   * request) on a non-JSON 2xx body such as an HTML outage/CDN interstitial.
    *
    * Cancellation needs nothing here: the shared client aborts the fetch on the
    * running tool call's ambient signal (mcp-utils `cancel`), which `runMcp`
    * sets for every handler.
    */
   async request<T>(method: string, path: string): Promise<T> {
-    try {
-      return await this.api.fetchJson<T>(method, path);
-    } catch (err) {
-      // fetchJson JSON.parses any non-empty 2xx body, so an HTML interstitial
-      // or outage page would otherwise surface as a bare SyntaxError that
-      // names neither the service nor the request.
-      if (!(err instanceof SyntaxError)) throw err;
-      throw new McpToolError(
-        `themeparks.wiki returned a non-JSON response for ${method} ${path} (likely an outage or CDN interstitial page).`,
-        { hint: 'This is an upstream problem; try again in a few minutes. sixflags_healthcheck reports whether themeparks.wiki is reachable.' },
-      );
-    }
+    return this.api.fetchJson<T>(method, path);
   }
 }
 
