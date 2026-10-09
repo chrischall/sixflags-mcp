@@ -1,4 +1,4 @@
-import { McpToolError } from '@chrischall/mcp-utils';
+import { currentCallSignal, McpToolError } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import type { SixFlagsClient } from './client.js';
 import { getHomePark } from './config.js';
@@ -80,6 +80,12 @@ export interface ParkDirectoryOptions {
 
 export class ParkDirectory {
   private cache: { parks: Park[]; fetchedAt: number } | undefined;
+  // The fetch currently in progress, shared by every caller that arrives while
+  // the cache is cold or expired — hosts fire tool calls in parallel, and each
+  // would otherwise download the whole themeparks.wiki catalog on its own.
+  // `signal` is the cancellation of the tool call that started it: the request
+  // runs under that call's ambient signal, so if it cancels, the others retry.
+  private inFlight: { promise: Promise<Park[]>; signal: AbortSignal | undefined } | undefined;
   private readonly now: () => number;
   private readonly homePark: string | undefined;
 
@@ -104,6 +110,25 @@ export class ParkDirectory {
     const cached = this.cache;
     if (cached && this.now() - cached.fetchedAt < CACHE_TTL_MS) return cached.parks;
 
+    if (!this.inFlight) {
+      // Cleared once settled (success or failure), so a rejection is never
+      // shared with callers that arrive after it.
+      const promise = this.fetchParks().finally(() => {
+        this.inFlight = undefined;
+      });
+      this.inFlight = { promise, signal: currentCallSignal() };
+    }
+    const shared = this.inFlight;
+    try {
+      return await shared.promise;
+    } catch (err) {
+      // Another caller's cancellation is not this caller's failure.
+      if (shared.signal?.aborted && shared.signal !== currentCallSignal()) return this.list();
+      throw err;
+    }
+  }
+
+  private async fetchParks(): Promise<Park[]> {
     const raw = await this.client.request<unknown>('GET', '/v1/destinations');
     const data = parseResponse(destinationsSchema, raw, 'destinations response');
 
