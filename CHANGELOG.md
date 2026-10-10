@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.8](https://github.com/chrischall/sixflags-mcp/compare/v2.1.7...v2.1.8) (2026-10-10)
+
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group with 2 updates ([#127](https://github.com/chrischall/sixflags-mcp/issues/127)) ([7470aa9](https://github.com/chrischall/sixflags-mcp/commit/7470aa93edc7218970e71bfeb90150cecba339a6))
+
 ## [2.1.7](https://github.com/chrischall/sixflags-mcp/compare/v2.1.6...v2.1.7) (2026-10-09)
 
 
