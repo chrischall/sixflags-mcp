@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.9](https://github.com/chrischall/sixflags-mcp/compare/v2.1.8...v2.1.9) (2026-10-16)
+
+
+### Bug Fixes
+
+* **config:** stop sending an unexpanded user_config placeholder as the User-Agent ([#132](https://github.com/chrischall/sixflags-mcp/issues/132)) ([cf8552c](https://github.com/chrischall/sixflags-mcp/commit/cf8552cd5f694b6575214eb00e455e2fb54b06f1))
+* **deps:** restore the @modelcontextprotocol/server 2.3.1 and dotenv 18.0.6 lock ([#130](https://github.com/chrischall/sixflags-mcp/issues/130)) ([b0b61f6](https://github.com/chrischall/sixflags-mcp/commit/b0b61f630f6fd0ca7475b094393e4014f59460b6)), closes [#129](https://github.com/chrischall/sixflags-mcp/issues/129)
+
 ## [2.1.8](https://github.com/chrischall/sixflags-mcp/compare/v2.1.7...v2.1.8) (2026-10-10)
 
 
