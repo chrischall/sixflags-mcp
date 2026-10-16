@@ -16,6 +16,16 @@ describe('getDefaultHeaders', () => {
     expect(getDefaultHeaders()['User-Agent']).toBe('my-agent/9');
   });
 
+  it.each(['${user_config.sixflags_user_agent}', 'undefined', 'null'])(
+    'treats an unexpanded/placeholder SIXFLAGS_USER_AGENT %j as unset (fleet-audit#1334)',
+    (v) => {
+      vi.stubEnv('SIXFLAGS_USER_AGENT', v);
+      expect(getDefaultHeaders()['User-Agent']).toBe(
+        'sixflags-mcp (+https://github.com/chrischall/sixflags-mcp)',
+      );
+    },
+  );
+
   it('falls back to the default when SIXFLAGS_USER_AGENT is blank', () => {
     vi.stubEnv('SIXFLAGS_USER_AGENT', '   ');
     expect(getDefaultHeaders()['User-Agent']).toContain('sixflags-mcp');
@@ -59,4 +69,11 @@ describe('getRequestTimeoutMs', () => {
     vi.stubEnv('SIXFLAGS_REQUEST_TIMEOUT_MS', '-5');
     expect(getRequestTimeoutMs()).toBe(15_000);
   });
+  it.each(['2.5', '1e3', '0', '${user_config.sixflags_request_timeout_ms}'])(
+    'rejects a non-integer or unexpanded value %j',
+    (v) => {
+      vi.stubEnv('SIXFLAGS_REQUEST_TIMEOUT_MS', v);
+      expect(getRequestTimeoutMs()).toBe(15_000);
+    },
+  );
 });
