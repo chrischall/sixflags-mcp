@@ -25,3 +25,9 @@ egress:
     # Only hosts the SERVER process actually fetches. Hosts that appear
     # solely in a URL this server BUILDS and returns are excluded.
     - api.themeparks.wiki
+examples:
+  - prompt: What are the wait times at Carowinds right now, and which rides are down?
+    note: Live standby and single-rider waits, longest first.
+  - prompt: I've already ridden Fury 325 and Copperhead Strike. What should I ride next with under a 20-minute wait?
+    note: Ranks open rides by shortest wait, skipping the ones you name.
+  - prompt: What are Six Flags Over Georgia's hours this coming week?
