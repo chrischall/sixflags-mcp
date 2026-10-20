@@ -31,3 +31,4 @@ examples:
   - prompt: I've already ridden Fury 325 and Copperhead Strike. What should I ride next with under a 20-minute wait?
     note: Ranks open rides by shortest wait, skipping the ones you name.
   - prompt: What are Six Flags Over Georgia's hours this coming week?
+    note: Day-by-day opening and closing times from today, for any park in the chain.
