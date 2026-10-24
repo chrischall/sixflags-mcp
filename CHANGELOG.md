@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.11](https://github.com/chrischall/sixflags-mcp/compare/v2.1.10...v2.1.11) (2026-10-24)
+
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group with 2 updates ([#144](https://github.com/chrischall/sixflags-mcp/issues/144)) ([50ea709](https://github.com/chrischall/sixflags-mcp/commit/50ea7095ac2cfae3b5ec5c2aaaf3741112d795b9))
+
+
+### Documentation
+
+* **mint:** add a note to the park-hours sample prompt ([#142](https://github.com/chrischall/sixflags-mcp/issues/142)) ([499585e](https://github.com/chrischall/sixflags-mcp/commit/499585e0186447b040d7059ddfb0264296f527b6)), closes [#140](https://github.com/chrischall/sixflags-mcp/issues/140)
+* **mint:** add sample prompts for the public catalog ([#139](https://github.com/chrischall/sixflags-mcp/issues/139)) ([cbdf397](https://github.com/chrischall/sixflags-mcp/commit/cbdf3973ebe52fce569ffa415ed62838b7d47bc2))
+
 ## [2.1.10](https://github.com/chrischall/sixflags-mcp/compare/v2.1.9...v2.1.10) (2026-10-17)
 
 
