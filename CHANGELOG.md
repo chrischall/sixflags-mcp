@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.1.11](https://github.com/chrischall/sixflags-mcp/compare/v2.1.10...v2.1.11) (2026-10-29)
+
+
+### Bug Fixes
+
+* **deps:** bump the production-dependencies group with 2 updates ([#144](https://github.com/chrischall/sixflags-mcp/issues/144)) ([50ea709](https://github.com/chrischall/sixflags-mcp/commit/50ea7095ac2cfae3b5ec5c2aaaf3741112d795b9))
+* **deps:** require @chrischall/mcp-utils 3.4.0 ([#145](https://github.com/chrischall/sixflags-mcp/issues/145)) ([fd10b11](https://github.com/chrischall/sixflags-mcp/commit/fd10b11711cb3cd9e302fb8d7cff07085a6cdf11))
+* **deps:** require the MCP SDK ^2.4.0 that mcp-utils 3.4.0 peer-requires ([#146](https://github.com/chrischall/sixflags-mcp/issues/146)) ([4cae7ed](https://github.com/chrischall/sixflags-mcp/commit/4cae7ede4740d3d5b246845823136288c98dbe1a))
+
+
+### Documentation
+
+* **mint:** add a note to the park-hours sample prompt ([#142](https://github.com/chrischall/sixflags-mcp/issues/142)) ([499585e](https://github.com/chrischall/sixflags-mcp/commit/499585e0186447b040d7059ddfb0264296f527b6)), closes [#140](https://github.com/chrischall/sixflags-mcp/issues/140)
+* **mint:** add sample prompts for the public catalog ([#139](https://github.com/chrischall/sixflags-mcp/issues/139)) ([cbdf397](https://github.com/chrischall/sixflags-mcp/commit/cbdf3973ebe52fce569ffa415ed62838b7d47bc2))
+
 ## [2.1.10](https://github.com/chrischall/sixflags-mcp/compare/v2.1.9...v2.1.10) (2026-10-17)
 
 
