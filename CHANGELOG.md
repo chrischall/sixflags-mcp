@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.12](https://github.com/chrischall/sixflags-mcp/compare/v2.1.11...v2.1.12) (2026-10-31)
+
+
+### Bug Fixes
+
+* **deps:** bump dotenv ([#147](https://github.com/chrischall/sixflags-mcp/issues/147)) ([28029d1](https://github.com/chrischall/sixflags-mcp/commit/28029d1e7b45b82aaad390e3b15d13ce87a215a6))
+
 ## [2.1.11](https://github.com/chrischall/sixflags-mcp/compare/v2.1.10...v2.1.11) (2026-10-29)
 
 
