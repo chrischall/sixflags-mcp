@@ -32,7 +32,7 @@ Optional on every data tool; omit it for the home park. When present it accepts 
 
 This server joins the **travel** group (mcp-host context groups; the tools carry `_meta.mint` hints).
 
-- **Canonical read:** `sixflags_get_park_schedule` answers the group's *what's on* ask — the home park's operating days and hours, with `view: "brief"` giving one line per day (`Carowinds — 2026-07-18 — open 10:00–22:00`). It takes no subject: the chain's parks are a public directory, not the person's own, so the group reads the configured home park. `sixflags_get_shows` is a non-canonical *what's on* (today's showtimes); everything else is a lookup.
+- **Canonical read:** `sixflags_get_park_schedule` answers the group's *what's on* ask — the home park's operating days and hours, with `view: "brief"` giving one line per day (`Carowinds — 2026-07-18 — open 10:00–22:00`) inside the untrusted-data envelope's `data` (park names and descriptions are the operator's text), or the single note line `-- none` when nothing is scheduled. It takes no subject: the chain's parks are a public directory, not the person's own, so the group reads the configured home park. `sixflags_get_shows` is a non-canonical *what's on* (today's showtimes); everything else is a lookup.
 - **No what's-new or what's-due:** nothing here is news or a deadline.
 - **A compound ask** looks like "is the park open this weekend, and anything else on our trip?" — the group answers the park's days and hours alongside the other travel sources.
 - **No browser needed:** the upstream is a public keyless API, so this source never answers "needs your browser open".
