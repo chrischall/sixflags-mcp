@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/chrischall/sixflags-mcp/compare/v2.2.0...v2.2.1) (2026-11-04)
+
+
+### Bug Fixes
+
+* **brief:** align the brief view with the fleet contract ([#150](https://github.com/chrischall/sixflags-mcp/issues/150)) ([bb7c213](https://github.com/chrischall/sixflags-mcp/commit/bb7c2136caf3fee61d88304ea1896e137bb3ea98))
+
 ## [2.2.0](https://github.com/chrischall/sixflags-mcp/compare/v2.1.11...v2.2.0) (2026-11-04)
 
 
