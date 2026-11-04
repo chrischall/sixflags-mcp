@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/server';
-import { McpToolError } from '@chrischall/mcp-utils';
+import { McpToolError, UNTRUSTED_CONTENT_RULE, untrustedEnvelope } from '@chrischall/mcp-utils';
 import { z } from 'zod';
 import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
@@ -68,15 +68,33 @@ function clock(iso: string | null | undefined): string | null {
   return m ? m[1] : null;
 }
 
+/** The shortest a title is cut to before the status gives way too. */
+const TITLE_FLOOR = 24;
+
+const cut = (s: string, n: number): string => (s.length > n ? `${s.slice(0, Math.max(n - 1, 0))}…` : s);
+
+/**
+ * Who writes the brief lines' text, for the untrusted-data envelope's note:
+ * the park name and an entry's description are the operator's words as
+ * themeparks.wiki republishes them, never this server's.
+ */
+export const SCHEDULE_BRIEF_WHO_WROTE =
+  'Park names and schedule descriptions are published by the park operator via themeparks.wiki.';
+
 /**
  * One schedule entry as one line, `title — <ISO date | no date> — <status>`,
- * at most 120 characters (the title is shortened). The title is the park,
- * plus the entry's description where it has one (an early-entry note, a
- * ticketed event); the status is `open HH:MM–HH:MM` for operating hours,
- * otherwise the entry's type in words (`info`, `ticketed event`).
+ * at most 120 characters, cut as a WHOLE, title first: the title shortens
+ * until the line fits, and the status is cut too only once the title is at
+ * its floor. The title is the park, plus the entry's description where it
+ * has one (an early-entry note, a ticketed event); the status is
+ * `open HH:MM–HH:MM` for operating hours, otherwise the entry's type in words
+ * (`info`, `ticketed event`). A title starting with `-- ` or `\` is escaped
+ * with one leading `\`, so an item can never read as a note line (the
+ * consolidated brief-view contract; the gateway strips that one backslash).
  */
 export function scheduleBriefLine(park: string, e: ScheduleBriefEntry): string {
-  const title = e.description?.trim() ? `${park}: ${e.description.trim()}` : park;
+  const raw = e.description?.trim() ? `${park}: ${e.description.trim()}` : park;
+  const title = raw.startsWith('-- ') || raw.startsWith('\\') ? `\\${raw}` : raw;
   const date = e.date || 'no date';
   const type = (e.type ?? '').trim();
   let status: string;
@@ -87,10 +105,12 @@ export function scheduleBriefLine(park: string, e: ScheduleBriefEntry): string {
   } else {
     status = type ? type.toLowerCase().replace(/_/g, ' ') : 'unknown';
   }
-  const tail = ` — ${date} — ${status}`;
-  const room = BRIEF_MAX - tail.length;
-  const shown = title.length > room ? `${title.slice(0, room - 1)}…` : title;
-  return `${shown}${tail}`;
+  const sep = ` — ${date} — `;
+  const room = BRIEF_MAX - sep.length;
+  if (title.length + status.length <= room) return `${title}${sep}${status}`;
+  const shown = cut(title, Math.max(room - status.length, Math.min(title.length, TITLE_FLOOR)));
+  // The date is upstream text too: if even it overflows, the whole line is cut.
+  return cut(`${shown}${sep}${cut(status, room - shown.length)}`, BRIEF_MAX);
 }
 
 export function registerParkTools(server: McpServer, directory: ParkDirectory): void {
@@ -163,7 +183,8 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .enum(['full', 'brief'])
           .describe(
             '"full" (default) returns the structured schedule; "brief" returns one line per entry: ' +
-              'park — <YYYY-MM-DD> — <open HH:MM–HH:MM | the entry type>.',
+              'park — <YYYY-MM-DD> — <open HH:MM–HH:MM | the entry type>, inside the untrusted-data ' +
+              'envelope as `data` (the operator’s own text); an empty window answers the note line `-- none`.',
           )
           .optional(),
       }),
@@ -197,11 +218,12 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
         .sort((a, b) => a.date.localeCompare(b.date));
 
       if (view === 'brief') {
-        return {
-          content: [
-            { type: 'text' as const, text: entries.map((e) => scheduleBriefLine(resolved.name, e)).join('\n') },
-          ],
-        };
+        const lines = entries.map((e) => scheduleBriefLine(resolved.name, e));
+        return jsonResponse(
+          untrustedEnvelope(lines.length ? lines : ['-- none'], {
+            note: `${SCHEDULE_BRIEF_WHO_WROTE} ${UNTRUSTED_CONTENT_RULE}`,
+          }),
+        );
       }
 
       const todayOperating = entries.find((e) => e.date === today && (e.type ?? '') === 'OPERATING');

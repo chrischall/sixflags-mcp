@@ -124,7 +124,13 @@ describe('sixflags_get_park_schedule view: brief', () => {
     const res = await h.callTool('sixflags_get_park_schedule', { view: 'brief' });
     await h.close();
     const text = (res.content as { type: string; text: string }[])[0].text;
-    const lines = text.split('\n');
+    // Park names and entry descriptions are the operator's text, so the lines
+    // ride in the fleet's untrusted-data envelope, minified, note first.
+    expect(text).not.toContain('\n');
+    expect(text.startsWith('{"untrusted_content":true,"note":')).toBe(true);
+    const env = JSON.parse(text) as { untrusted_content: boolean; note: string; data: string[] };
+    expect(env.note).toMatch(/themeparks\.wiki/);
+    const lines = env.data;
     expect(lines).toEqual([
       'Carowinds — 2026-07-18 — open 10:00–22:00',
       'Carowinds: Early Entry for members — 2026-07-18 — info',
@@ -137,7 +143,7 @@ describe('sixflags_get_park_schedule view: brief', () => {
     }
   });
 
-  it('answers no lines when nothing is scheduled in the window', async () => {
+  it('answers the single note line `-- none` when nothing is scheduled in the window', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2027-01-10T14:00:00Z'));
     const { directory } = makeDirectory();
@@ -145,7 +151,9 @@ describe('sixflags_get_park_schedule view: brief', () => {
     const res = await h.callTool('sixflags_get_park_schedule', { view: 'brief' });
     await h.close();
     expect(res.isError).toBeFalsy();
-    expect((res.content as { text: string }[])[0].text).toBe('');
+    const env = JSON.parse((res.content as { text: string }[])[0].text) as { untrusted_content: boolean; data: string[] };
+    expect(env.untrusted_content).toBe(true);
+    expect(env.data).toEqual(['-- none']);
   });
 
   it('shortens a long title to keep the line ≤ 120 chars, and falls back for missing fields', () => {
@@ -160,5 +168,28 @@ describe('sixflags_get_park_schedule view: brief', () => {
     expect(
       scheduleBriefLine('Carowinds', { date: '2026-07-18', type: 'OPERATING', openingTime: '2026-07-18T10:00:00-04:00' }),
     ).toBe('Carowinds — 2026-07-18 — open');
+  });
+
+  it('escapes a title that starts with "-- " or "\\" with one leading backslash, so it never reads as a note', () => {
+    expect(scheduleBriefLine('-- none', { date: '2026-07-18', type: 'INFO' })).toBe('\\-- none — 2026-07-18 — info');
+    expect(scheduleBriefLine('\\x', { date: '2026-07-18', type: 'INFO' })).toBe('\\\\x — 2026-07-18 — info');
+    expect(scheduleBriefLine('Carowinds -- x', { date: '2026-07-18', type: 'INFO' })).toBe(
+      'Carowinds -- x — 2026-07-18 — info',
+    );
+  });
+
+  it('cuts the line as a WHOLE, title first: an overlong status is cut too once the title is at its floor', () => {
+    const l = scheduleBriefLine('Carowinds', { date: '2026-07-18', type: 'Y'.repeat(300), description: 'x'.repeat(200) });
+    expect(l.length).toBeLessThanOrEqual(120);
+    expect(l).toMatch(BRIEF);
+    expect(l.startsWith('Carowinds: x')).toBe(true);
+    expect(l.endsWith('…')).toBe(true);
+    // A short title keeps all of itself and the status gives way.
+    const s = scheduleBriefLine('Carowinds', { date: '2026-07-18', type: 'Y'.repeat(300) });
+    expect(s.length).toBeLessThanOrEqual(120);
+    expect(s.startsWith('Carowinds — 2026-07-18 — y')).toBe(true);
+    // An overlong date is upstream text too: the whole line still fits.
+    const d = scheduleBriefLine('Carowinds', { date: '9'.repeat(200), type: 'INFO' });
+    expect(d.length).toBeLessThanOrEqual(120);
   });
 });
