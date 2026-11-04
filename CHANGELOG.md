@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/chrischall/sixflags-mcp/compare/v2.1.11...v2.2.0) (2026-11-04)
+
+
+### Features
+
+* context-group hints, a brief view on the park schedule ([#149](https://github.com/chrischall/sixflags-mcp/issues/149)) ([588bb8b](https://github.com/chrischall/sixflags-mcp/commit/588bb8b206c9778ba7d4f779e8e154f3bf2dfb40))
+
+
+### Bug Fixes
+
+* **deps:** bump dotenv ([#147](https://github.com/chrischall/sixflags-mcp/issues/147)) ([28029d1](https://github.com/chrischall/sixflags-mcp/commit/28029d1e7b45b82aaad390e3b15d13ce87a215a6))
+
 ## [2.1.11](https://github.com/chrischall/sixflags-mcp/compare/v2.1.10...v2.1.11) (2026-10-29)
 
 
