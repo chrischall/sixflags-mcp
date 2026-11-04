@@ -30,10 +30,11 @@ src/
     waittimes.ts    sixflags_get_wait_times, sixflags_suggest_next
     attractions.ts  sixflags_list_attractions, sixflags_get_shows
     health.ts       sixflags_healthcheck
+    hints.ts        travelMeta — the `_meta.mint` context-group hint for each tool
 tests/              mirrors src/; mocks SixFlagsClient.request via vi.spyOn (see tests/_fixtures.ts). server-boot.test.ts drives the real built artifacts.
 ```
 
-Each `tools/*.ts` exports `registerXTools(server: McpServer, directory: ParkDirectory)` and calls `server.registerTool(name, { description, inputSchema, annotations }, handler)`. `index.ts` threads the single `ParkDirectory` instance as `deps` to every registrar, so all seven tools are exposed — every one is a read-only keyless public call.
+Each `tools/*.ts` exports `registerXTools(server: McpServer, directory: ParkDirectory)` and calls `server.registerTool(name, { description, inputSchema, annotations, _meta }, handler)`. `index.ts` threads the single `ParkDirectory` instance as `deps` to every registrar, so all seven tools are exposed — every one is a read-only keyless public call.
 
 ## Data source: themeparks.wiki v1
 
@@ -50,11 +51,17 @@ Public, keyless, free. No login, no rate-limit headaches at our volume (`createA
 
 Every JSON response is validated at the call site with `parseLenient(schema, raw, { label: 'sixflags-mcp', context })` from `@chrischall/mcp-utils`. Schemas are `z.looseObject(...)` covering only the fields we read (unknown keys pass through). Lenient mode: on a shape mismatch it warns to stderr and returns the raw response, which then flows through the `?? fallback` chains — an upstream change degrades gracefully rather than crashing. When adding an endpoint, define a loose schema next to the call and wrap the request.
 
-## Response shape — minified, and deliberately no `view` parameter
+## Response shape — minified, and deliberately no `view: compact | full` parameter
 
 `jsonResponse` (`tools/_shared.ts`) is `minifiedResult` from `@chrischall/mcp-utils`: every tool result is one line of JSON with no indentation. Indentation is tokens the caller pays for and never reads.
 
 There is **no `view: compact | full` parameter here, and that is a decision, not an omission.** The fleet's `view` rung strips image/avatar URLs out of an upstream payload that a server hands back close to verbatim. No tool in this repo does that: all seven reads re-project themeparks.wiki's response field by field into a fresh object literal (`parks.ts`, `waittimes.ts`, `attractions.ts`, `health.ts`), and none of those literals carries a media field — themeparks.wiki's `/v1/destinations`, `/v1/entity/{id}/children`, `/v1/entity/{id}/schedule` and `/v1/entity/{id}/live` emit none. A `view` here would be a parameter whose `compact` and `full` rungs are byte-identical, which is worse than no parameter: it advertises a saving it cannot make. A `src/view.ts` was added by a fleet rollout and removed for exactly this reason; if a future endpoint does start returning media URLs, re-add it wired to *that* tool rather than to all of them.
+
+The one `view` that does exist is different in kind: `sixflags_get_park_schedule` takes `view: full | brief`, the mcp-host context-groups contract for a canonical read. `brief` is not a trimmed payload but a different answer — one line per schedule entry, `title — <date> — <status>`, ≤ 120 chars (`scheduleBriefLine` in `tools/parks.ts`).
+
+## Context-group hints
+
+Every tool except the healthcheck carries `_meta.mint` (`travelMeta` in `tools/hints.ts`): domain `travel`, an intent, and spoken aliases. `sixflags_get_park_schedule` is the one canonical read (`whats-on`, with `view: brief`); it has no `subject` (the chain's parks are a public directory, not the person's subjects) and no `when` (it takes `days`, not a start/end range). `tests/tools/mint-hints.test.ts` holds the rules against the served tool list — a new tool must be added to its intent table.
 
 ## Park resolution
 

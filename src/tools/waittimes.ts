@@ -9,6 +9,7 @@ import {
   normalizeAttractions,
   type NormalizedAttraction,
 } from './_shared.js';
+import { travelMeta } from './hints.js';
 
 // Summary stats over the open rides — the numbers a guest uses to read the
 // crowd at a glance.
@@ -49,6 +50,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('lookup', { aliases: ['wait times', 'lines', 'how long', 'rides', 'queue', 'crowds'] }),
     },
     async ({ park, openOnly }: { park?: string; openOnly?: boolean }) => {
       const resolved = await directory.resolve(park);
@@ -94,6 +96,7 @@ export function registerWaitTimeTools(server: McpServer, directory: ParkDirector
           .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('lookup', { aliases: ['what to ride', 'next ride', 'shortest line', 'short wait'] }),
     },
     async ({
       park,

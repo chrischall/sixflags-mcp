@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
 import { fetchLive, jsonResponse } from './_shared.js';
+import { travelMeta } from './hints.js';
 
 const childSchema = z.looseObject({
   id: z.string(),
@@ -32,6 +33,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
           .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('lookup', { aliases: ['rides', 'coasters', 'restaurants', 'park map', 'attractions'] }),
     },
     async ({ park, type }: { park?: string; type?: 'ATTRACTION' | 'SHOW' | 'RESTAURANT' }) => {
       const resolved = await directory.resolve(park);
@@ -75,6 +77,7 @@ export function registerAttractionTools(server: McpServer, directory: ParkDirect
           .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('whats-on', { aliases: ['shows', 'showtimes', 'parade', 'character meet', 'stunt show'] }),
     },
     async ({ park }: { park?: string }) => {
       const resolved = await directory.resolve(park);

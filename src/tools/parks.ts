@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { lenientArray, opt, parseResponse } from '../lenient.js';
 import type { ParkDirectory } from '../parks.js';
 import { jsonResponse } from './_shared.js';
+import { travelMeta } from './hints.js';
 
 const scheduleEntrySchema = z.looseObject({
   date: z.string(),
@@ -49,6 +50,49 @@ function addDays(dateStr: string, n: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }
 
+const BRIEF_MAX = 120;
+
+/** The fields of a schedule entry a brief line reads. */
+export interface ScheduleBriefEntry {
+  date: string;
+  type?: string | null;
+  openingTime?: string | null;
+  closingTime?: string | null;
+  description?: string | null;
+}
+
+// The park-local HH:MM of an ISO timestamp (themeparks.wiki sends the park's
+// own offset, so the wall-clock digits are already local), or null.
+function clock(iso: string | null | undefined): string | null {
+  const m = /T(\d{2}:\d{2})/.exec(iso ?? '');
+  return m ? m[1] : null;
+}
+
+/**
+ * One schedule entry as one line, `title — <ISO date | no date> — <status>`,
+ * at most 120 characters (the title is shortened). The title is the park,
+ * plus the entry's description where it has one (an early-entry note, a
+ * ticketed event); the status is `open HH:MM–HH:MM` for operating hours,
+ * otherwise the entry's type in words (`info`, `ticketed event`).
+ */
+export function scheduleBriefLine(park: string, e: ScheduleBriefEntry): string {
+  const title = e.description?.trim() ? `${park}: ${e.description.trim()}` : park;
+  const date = e.date || 'no date';
+  const type = (e.type ?? '').trim();
+  let status: string;
+  if (type.toUpperCase() === 'OPERATING') {
+    const open = clock(e.openingTime);
+    const close = clock(e.closingTime);
+    status = open && close ? `open ${open}–${close}` : 'open';
+  } else {
+    status = type ? type.toLowerCase().replace(/_/g, ' ') : 'unknown';
+  }
+  const tail = ` — ${date} — ${status}`;
+  const room = BRIEF_MAX - tail.length;
+  const shown = title.length > room ? `${title.slice(0, room - 1)}…` : title;
+  return `${shown}${tail}`;
+}
+
 export function registerParkTools(server: McpServer, directory: ParkDirectory): void {
   server.registerTool(
     'sixflags_list_parks',
@@ -62,6 +106,7 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('lookup', { aliases: ['theme parks', 'amusement parks', 'water parks', 'six flags'] }),
     },
     async ({ search }: { search?: string }) => {
       const all = await directory.list();
@@ -114,10 +159,21 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
           .max(60)
           .describe('How many days ahead to include (default 10)')
           .optional(),
+        view: z
+          .enum(['full', 'brief'])
+          .describe(
+            '"full" (default) returns the structured schedule; "brief" returns one line per entry: ' +
+              'park — <YYYY-MM-DD> — <open HH:MM–HH:MM | the entry type>.',
+          )
+          .optional(),
       }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      _meta: travelMeta('whats-on', {
+        canonical: true,
+        aliases: ['park hours', 'theme park', 'amusement park', 'open today', 'six flags', 'roller coasters'],
+      }),
     },
-    async ({ park, days }: { park?: string; days?: number }) => {
+    async ({ park, days, view }: { park?: string; days?: number; view?: 'full' | 'brief' }) => {
       const resolved = await directory.resolve(park);
       const raw = await directory.client.request<unknown>(
         'GET',
@@ -139,6 +195,14 @@ export function registerParkTools(server: McpServer, directory: ParkDirectory): 
       const entries = data.schedule
         .filter((e) => e.date >= from && e.date <= horizon)
         .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (view === 'brief') {
+        return {
+          content: [
+            { type: 'text' as const, text: entries.map((e) => scheduleBriefLine(resolved.name, e)).join('\n') },
+          ],
+        };
+      }
 
       const todayOperating = entries.find((e) => e.date === today && (e.type ?? '') === 'OPERATING');
 
