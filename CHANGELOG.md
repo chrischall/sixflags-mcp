@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.2](https://github.com/chrischall/sixflags-mcp/compare/v2.2.1...v2.2.2) (2026-11-07)
+
+
+### Documentation
+
+* CLAUDE.md describes the brief answer's envelope and notes ([#153](https://github.com/chrischall/sixflags-mcp/issues/153)) ([0809912](https://github.com/chrischall/sixflags-mcp/commit/08099124ae19c381802382b9ba6eb4aa284dc179))
+
 ## [2.2.1](https://github.com/chrischall/sixflags-mcp/compare/v2.2.0...v2.2.1) (2026-11-04)
 
 
