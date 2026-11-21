@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.2](https://github.com/chrischall/sixflags-mcp/compare/v2.2.1...v2.2.2) (2026-11-21)
+
+
+### Bug Fixes
+
+* **deps:** bump @chrischall/mcp-utils ([#159](https://github.com/chrischall/sixflags-mcp/issues/159)) ([c49c0e5](https://github.com/chrischall/sixflags-mcp/commit/c49c0e5da22e731a0e2b490f8459f2182a5d26f4))
+* **deps:** bump the production-dependencies group with 2 updates ([#157](https://github.com/chrischall/sixflags-mcp/issues/157)) ([f6f30b5](https://github.com/chrischall/sixflags-mcp/commit/f6f30b590a3e27ffd298774817b4330f04d5cfbe))
+
+
+### Documentation
+
+* CLAUDE.md describes the brief answer's envelope and notes ([#153](https://github.com/chrischall/sixflags-mcp/issues/153)) ([0809912](https://github.com/chrischall/sixflags-mcp/commit/08099124ae19c381802382b9ba6eb4aa284dc179))
+
 ## [2.2.1](https://github.com/chrischall/sixflags-mcp/compare/v2.2.0...v2.2.1) (2026-11-04)
 
 
